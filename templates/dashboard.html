@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | SHAKTI AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVIGATION BAR -->
+
+    <header>
+        <nav class="navbar">
+
+            <div class="logo">
+                SHAKTI AI
+            </div>
+
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+
+        </nav>
+    </header>
+
+
+    <!-- DASHBOARD SECTION -->
+
+    <section class="dashboard-container">
+
+        <div class="dashboard-heading">
+
+            <h1>Welcome, {{ name }}!</h1>
+
+            <p>
+                Your personal safety dashboard.
+                Stay safe, stay confident.
+            </p>
+
+        </div>
+
+
+        <div class="dashboard-grid">
+
+
+            <!-- 1. SAFECIRCLE -->
+
+            <div class="feature-card">
+
+                <div class="card-icon">🛡️</div>
+
+                <h2>SafeCircle</h2>
+
+                <p>
+                    Add and manage your trusted emergency contacts.
+                </p>
+
+                <a href="{{ url_for('safecircle') }}"
+                   class="card-btn">
+                    Open SafeCircle
+                </a>
+
+            </div>
+
+
+            <!-- 2. VOICEGUARD -->
+
+            <div class="feature-card">
+
+                <div class="card-icon">🎤</div>
+
+                <h2>VoiceGuard</h2>
+
+                <p>
+                    Voice-based safety assistance for emergency situations.
+                </p>
+
+                <a href="{{ url_for('voiceguard') }}"
+                   class="card-btn">
+                    Open VoiceGuard
+                </a>
+
+            </div>
+
+            
+
+<!-- 3. JOURNEY GUARDIAN -->
+<div class="feature-card">
+
+    <div class="card-icon">🚶‍♀️</div>
+
+    <h2>Journey Guardian</h2>
+
+    <p>
+        Stay protected and monitor your journey while travelling.
+    </p>
+
+    <a href="{{ url_for('journey_guardian') }}" class="card-btn">
+        Open Journey Guardian
+    </a>
+
+</div>
+
+
+            <!-- 4. SAFETY MAP -->
+
+            <div class="feature-card">
+
+                <div class="card-icon">📍</div>
+
+                <h2>Safety Map</h2>
+
+                <p>
+                    Explore nearby safety resources and important locations.
+                </p>
+
+                <span class="coming-soon">
+                    Coming Soon
+                </span>
+
+            </div>
+
+
+            <!-- 5. AI SAFETY ASSISTANT -->
+
+            <div class="feature-card">
+
+                <div class="card-icon">🤖</div>
+
+                <h2>AI Safety Assistant</h2>
+
+                <p>
+                    Get intelligent safety guidance and assistance.
+                </p>
+
+                <span class="coming-soon">
+                    Coming Soon
+                </span>
+
+            </div>
+
+
+            <!-- 6. MY PROFILE -->
+
+            <div class="feature-card">
+
+                <div class="card-icon">👤</div>
+
+                <h2>My Profile</h2>
+
+                <p>
+                    View and update your personal account information.
+                </p>
+
+                <a href="{{ url_for('profile') }}"
+                   class="card-btn">
+                    View My Profile
+                </a>
+
+            </div>
+
+
+            <!-- 7. SOS HISTORY -->
+
+            <div class="feature-card">
+
+                <div class="card-icon">🚨</div>
+
+                <h2>SOS History</h2>
+
+                <p>
+                    View your previous SOS activations and emergency records.
+                </p>
+
+                <a href="{{ url_for('sos_history') }}"
+                   class="card-btn">
+                    View SOS History
+                </a>
+
+            </div>
+
+
+            <!-- 8. CHANGE PASSWORD -->
+
+            <div class="feature-card">
+
+                <div class="card-icon">🔐</div>
+
+                <h2>Change Password</h2>
+
+                <p>
+                    Update your account password and keep your account secure.
+                </p>
+
+                <a href="{{ url_for('change_password') }}"
+                   class="card-btn">
+                    Change Password
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+        <p>
+            &copy; 2026 SHAKTI AI. All Rights Reserved.
+        </p>
+    </footer>
+
+
+</body>
+</html>
+

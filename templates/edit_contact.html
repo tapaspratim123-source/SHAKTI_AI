@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Contact | SHAKTI AI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="auth-page">
+
+    <div class="auth-container">
+
+        <h1>Edit Emergency Contact</h1>
+        <p>Update your trusted contact details.</p>
+
+        <form method="POST">
+
+            <label for="name">Full Name</label>
+            <input
+                type="text"
+                id="name"
+                name="name"
+                value="{{ contact['name'] }}"
+                required
+            >
+
+            <label for="phone">Phone Number</label>
+            <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value="{{ contact['phone'] }}"
+                required
+            >
+
+            <label for="relationship">Relationship</label>
+
+            <select id="relationship" name="relationship" required>
+                {% for relation in ['Mother', 'Father', 'Brother', 'Sister', 'Friend', 'Spouse', 'Other'] %}
+                    <option value="{{ relation }}"
+                        {% if contact['relationship'] == relation %}selected{% endif %}>
+                        {{ relation }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Update Contact</button>
+
+        </form>
+
+        <br>
+
+        <a href="{{ url_for('safecircle') }}">← Back to SafeCircle</a>
+
+    </div>
+
+</body>
+</html>

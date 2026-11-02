@@ -1,0 +1,535 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VoiceGuard | SHAKTI AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .voice-container {
+            max-width: 750px;
+            margin: 50px auto;
+            padding: 35px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 25px rgba(84, 37, 138, 0.10);
+            text-align: center;
+        }
+
+        .voice-icon {
+            font-size: 65px;
+            margin-bottom: 15px;
+        }
+
+        .voice-container h1 {
+            color: #54258a;
+            margin-bottom: 10px;
+        }
+
+        .voice-description {
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .voice-status {
+            padding: 15px;
+            background: #f4eaff;
+            color: #54258a;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .voice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .voice-buttons button {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .start-btn {
+            background: #54258a;
+            color: white;
+        }
+
+        .start-btn:hover {
+            background: #a33bb9;
+        }
+
+        .stop-btn {
+            background: #e32636;
+            color: white;
+        }
+
+        .stop-btn:hover {
+            background: #bd1727;
+        }
+
+        .transcript-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #faf7ff;
+            border-radius: 12px;
+            text-align: left;
+            min-height: 120px;
+        }
+
+        .transcript-box h3 {
+            color: #54258a;
+            margin-bottom: 12px;
+        }
+
+        #transcript {
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .voice-warning {
+            display: none;
+            margin-top: 20px;
+            padding: 18px;
+            background: #fff0f0;
+            color: #bd1727;
+            border-radius: 10px;
+        }
+
+        .confirm-btn {
+            margin-top: 15px;
+            padding: 12px 22px;
+            background: #e32636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            margin-top: 15px;
+            padding: 12px 22px;
+            background: #eee;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .voice-note {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f9f5fb;
+            border-radius: 10px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #54258a;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            color: #d83f89;
+        }
+
+        @media (max-width: 600px) {
+            .voice-container {
+                margin: 25px 15px;
+                padding: 25px 18px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="voice-container">
+
+        <div class="voice-icon">🎤</div>
+
+        <h1>VoiceGuard</h1>
+
+        <p class="voice-description">
+            Your voice-based personal safety assistant.
+        </p>
+
+
+        <!-- VOICE STATUS -->
+
+        <div class="voice-status" id="voiceStatus">
+            VoiceGuard is currently inactive.
+        </div>
+
+
+        <!-- VOICE BUTTONS -->
+
+        <div class="voice-buttons">
+
+            <button class="start-btn"
+                    id="startButton"
+                    onclick="startListening()">
+                🎤 Start Listening
+            </button>
+
+            <button class="stop-btn"
+                    id="stopButton"
+                    onclick="stopListening()"
+                    disabled>
+                Stop Listening
+            </button>
+
+        </div>
+
+
+        <!-- SPEECH TRANSCRIPTION -->
+
+        <div class="transcript-box">
+
+            <h3>Recognised Speech</h3>
+
+            <p id="transcript">
+                Your spoken words will appear here.
+            </p>
+
+        </div>
+
+
+        <!-- EMERGENCY WARNING -->
+
+        <div class="voice-warning" id="emergencyWarning">
+
+            <h3>⚠️ Emergency Keyword Detected!</h3>
+
+            <p>
+                An emergency-related word was recognised.
+                Do you want to proceed to the SOS feature?
+            </p>
+
+            <button class="confirm-btn"
+                    onclick="confirmEmergency()">
+                Confirm SOS
+            </button>
+
+            <button class="cancel-btn"
+                    onclick="cancelEmergency()">
+                Cancel
+            </button>
+
+        </div>
+
+
+        <!-- INFORMATION -->
+
+        <div class="voice-note">
+
+            <strong>How it works:</strong>
+
+            <p>
+                Click Start Listening and speak clearly.
+                VoiceGuard will display your speech and look
+                for emergency keywords such as "help",
+                "emergency" and "save me".
+            </p>
+
+            <p>
+                Microphone permission is required.
+                Voice recognition depends on browser support.
+            </p>
+
+        </div>
+
+
+        <a href="{{ url_for('dashboard') }}" class="back-link">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+
+    <!-- VOICE RECOGNITION JAVASCRIPT -->
+
+    <script>
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+        let recognition;
+        let isListening = false;
+        let emergencyDetected = false;
+
+        const voiceStatus =
+            document.getElementById("voiceStatus");
+
+        const transcript =
+            document.getElementById("transcript");
+
+        const emergencyWarning =
+            document.getElementById("emergencyWarning");
+
+        const startButton =
+            document.getElementById("startButton");
+
+        const stopButton =
+            document.getElementById("stopButton");
+
+
+        // CHECK BROWSER SUPPORT
+
+        if (!SpeechRecognition) {
+
+            voiceStatus.innerText =
+                "Voice recognition is not supported by this browser.";
+
+            startButton.disabled = true;
+
+        } else {
+
+            recognition = new SpeechRecognition();
+
+            recognition.lang = "en-IN";
+
+            recognition.continuous = true;
+
+            recognition.interimResults = true;
+
+
+            // START LISTENING
+
+            recognition.onstart = function() {
+
+                isListening = true;
+
+                voiceStatus.innerText =
+                    "Listening... Speak now.";
+
+                startButton.disabled = true;
+
+                stopButton.disabled = false;
+
+            };
+
+
+            // RECOGNISE SPEECH
+
+            recognition.onresult = function(event) {
+
+                let spokenText = "";
+
+                for (
+                    let i = event.resultIndex;
+                    i < event.results.length;
+                    i++
+                ) {
+
+                    spokenText +=
+                        event.results[i][0].transcript + " ";
+
+                }
+
+                transcript.innerText = spokenText;
+
+                detectEmergency(spokenText);
+
+            };
+
+
+            // HANDLE ERRORS
+
+            recognition.onerror = function(event) {
+
+                voiceStatus.innerText =
+                    "Voice recognition error: " + event.error;
+
+            };
+
+
+            // HANDLE RECOGNITION END
+
+            recognition.onend = function() {
+
+                isListening = false;
+
+                startButton.disabled = false;
+
+                stopButton.disabled = true;
+
+                if (!emergencyDetected) {
+
+                    voiceStatus.innerText =
+                        "VoiceGuard is inactive.";
+
+                }
+
+            };
+
+        }
+
+
+        // START LISTENING FUNCTION
+
+        function startListening() {
+
+            if (!recognition) {
+                return;
+            }
+
+            emergencyDetected = false;
+
+            emergencyWarning.style.display = "none";
+
+            transcript.innerText = "Listening for speech...";
+
+            try {
+
+                recognition.start();
+
+            } catch (error) {
+
+                voiceStatus.innerText =
+                    "Voice recognition is already running.";
+
+            }
+
+        }
+
+
+        // STOP LISTENING FUNCTION
+
+        function stopListening() {
+
+            if (recognition && isListening) {
+
+                recognition.stop();
+
+            }
+
+            voiceStatus.innerText =
+                "Listening stopped.";
+
+        }
+
+
+        // EMERGENCY KEYWORD DETECTION
+
+        function detectEmergency(text) {
+
+            const keywords = [
+                "help",
+                "emergency",
+                "save me",
+                "danger",
+                "help me"
+            ];
+
+            const words = text.toLowerCase();
+
+            const detected = keywords.some(keyword => {
+
+                const pattern = new RegExp(
+                    "\\b" +
+                    keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") +
+                    "\\b"
+                );
+
+                return pattern.test(words);
+
+            });
+
+            if (detected && !emergencyDetected) {
+
+                emergencyDetected = true;
+
+                recognition.stop();
+
+                voiceStatus.innerText =
+                    "Emergency-related keyword detected!";
+
+                emergencyWarning.style.display = "block";
+
+                speakMessage(
+                    "Emergency keyword detected. Please confirm if you need assistance."
+                );
+
+            }
+
+        }
+
+
+        // VOICE FEEDBACK
+
+        function speakMessage(message) {
+
+            if ("speechSynthesis" in window) {
+
+                const speech =
+                    new SpeechSynthesisUtterance(message);
+
+                speech.lang = "en-IN";
+
+                window.speechSynthesis.speak(speech);
+
+            }
+
+        }
+
+
+        // CONFIRM EMERGENCY
+
+        function confirmEmergency() {
+
+            emergencyWarning.style.display = "none";
+
+            voiceStatus.innerText =
+                "SOS confirmation received. Emergency integration is not connected yet.";
+
+            speakMessage(
+                "SOS confirmation received. The emergency system is not connected yet."
+            );
+
+        }
+
+
+        // CANCEL EMERGENCY
+
+        function cancelEmergency() {
+
+            emergencyWarning.style.display = "none";
+
+            emergencyDetected = false;
+
+            voiceStatus.innerText =
+                "Emergency prompt cancelled.";
+
+            speakMessage(
+                "Emergency prompt cancelled."
+            );
+
+        }
+
+    </script>
+
+</body>
+</html>
+```

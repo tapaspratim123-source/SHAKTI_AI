@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey Guardian | SHAKTI AI</title>
+
+```
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5eaff, #ffe5f0);
+        min-height: 100vh;
+        color: #333;
+    }
+
+    nav {
+        background: #6a1b9a;
+        color: white;
+        padding: 18px 8%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    nav h2 {
+        font-size: 24px;
+    }
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: bold;
+    }
+
+    .container {
+        max-width: 750px;
+        margin: 45px auto;
+        padding: 20px;
+    }
+
+    .heading {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .heading h1 {
+        color: #6a1b9a;
+        margin-bottom: 10px;
+    }
+
+    .heading p {
+        color: #666;
+    }
+
+    .journey-card {
+        background: white;
+        padding: 30px;
+        border-radius: 18px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .journey-card label {
+        display: block;
+        margin: 18px 0 8px;
+        font-weight: bold;
+        color: #512079;
+    }
+
+    .journey-card input {
+        width: 100%;
+        padding: 13px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+
+    .journey-card input:focus {
+        outline: none;
+        border-color: #9c27b0;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        background: #8e24aa;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 25px;
+    }
+
+    .btn:hover {
+        background: #6a1b9a;
+    }
+
+    .status {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        background: #f3e5f5;
+        color: #6a1b9a;
+        display: none;
+        line-height: 1.6;
+    }
+
+    .note {
+        margin-top: 20px;
+        font-size: 13px;
+        color: #777;
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    @media(max-width: 600px) {
+        .container {
+            margin: 20px auto;
+        }
+
+        .journey-card {
+            padding: 20px;
+        }
+
+        nav {
+            padding: 15px 5%;
+        }
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+```
+<nav>
+    <h2>SHAKTI AI</h2>
+    <div>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="heading">
+        <h1>🛡️ Journey Guardian</h1>
+        <p>Your journey, your safety, our priority.</p>
+    </div>
+
+    <div class="journey-card">
+
+        <form id="journeyForm">
+
+            <label for="destination">Enter Your Destination</label>
+            <input type="text" id="destination"
+                   placeholder="Example: Home, College, Office"
+                   required>
+
+            <label for="arrivalTime">Expected Arrival Time</label>
+            <input type="datetime-local" id="arrivalTime" required>
+
+            <button type="submit" class="btn">
+                Start My Journey
+            </button>
+
+        </form>
+
+        <div class="status" id="journeyStatus"></div>
+
+        <p class="note">
+            Journey Guardian is currently in development.
+            This version records your journey details in this page only.
+            It does not automatically monitor your location or notify
+            trusted contacts.
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+    const arrivalInput = document.getElementById("arrivalTime");
+
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+
+    arrivalInput.min = now.toISOString().slice(0, 16);
+
+    document.getElementById("journeyForm").addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        const destination = document.getElementById("destination").value.trim();
+        const arrivalTime = document.getElementById("arrivalTime").value;
+        const status = document.getElementById("journeyStatus");
+
+        if (!destination || !arrivalTime) {
+            alert("Please enter all journey details.");
+            return;
+        }
+
+        if (new Date(arrivalTime) <= new Date()) {
+            alert("Please select a future arrival time.");
+            return;
+        }
+
+        const formattedTime = new Date(arrivalTime).toLocaleString();
+
+        status.style.display = "block";
+
+        status.innerHTML = `
+            <strong>Journey Details Recorded!</strong><br><br>
+            Destination: ${escapeHTML(destination)}<br>
+            Expected Arrival: ${formattedTime}<br><br>
+            Your journey details are displayed here.
+        `;
+    });
+
+    function escapeHTML(value) {
+        return value.replace(/[&<>"']/g, function(char) {
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            }[char];
+        });
+    }
+</script>
+```
+
+</body>
+</html>

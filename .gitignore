@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+shakti.db
+instance/
+.env
+venv/
+.venv/

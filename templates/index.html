@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHAKTI AI | Women Safety</title>
+
+```
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
+```
+
+</head>
+
+<body>
+
+```
+<!-- Navigation Bar -->
+<header>
+    <nav class="navbar">
+
+        <div class="logo">
+            SHAKTI <span>AI</span>
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+
+        <a href="{{ url_for('register') }}" class="nav-button">
+            Get Started
+        </a>
+
+    </nav>
+</header>
+
+
+<!-- Hero Section -->
+<section class="hero" id="home">
+
+    <div class="hero-content">
+
+        <span class="tagline">YOUR SAFETY MATTERS</span>
+
+        <h1>
+            Empowering Women.<br>
+            <span>Protecting Lives.</span>
+        </h1>
+
+        <p>
+            SHAKTI AI is an intelligent women safety platform
+            designed to provide emergency assistance, smart
+            safety tools and reliable support whenever needed.
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="#features" class="primary-btn">
+                Explore Features
+            </a>
+
+            <a href="#about" class="secondary-btn">
+                Learn More
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Hero Card -->
+    <div class="hero-card">
+
+        <div class="shield">🛡️</div>
+
+        <h2>Your Safety</h2>
+
+        <p>Our Priority</p>
+
+        <div class="status">
+            ● Safety Support Platform
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Emergency Section -->
+<section class="emergency">
+
+    <h2>Need Emergency Assistance?</h2>
+
+    <p>
+        Access your emergency assistance tools whenever necessary.
+    </p>
+
+    <button
+        class="sos-button"
+        type="button"
+        onclick="activateSOS()">
+
+        🚨 SOS EMERGENCY
+
+    </button>
+
+    <small>
+        GPS location detection is available.
+        Demo SMS notifications are simulated only.
+    </small>
+
+</section>
+
+
+<!-- Features Section -->
+<section class="features" id="features">
+
+    <div class="section-heading">
+
+        <span>OUR SERVICES</span>
+
+        <h2>Smart Safety Features</h2>
+
+        <p>
+            Technology designed to make everyday journeys safer.
+        </p>
+
+    </div>
+
+
+    <div class="feature-container">
+
+        <div class="feature-card">
+            <div class="icon">📍</div>
+            <h3>SafeRoute</h3>
+            <p>
+                Explore routes using available safety-related
+                location information.
+            </p>
+        </div>
+
+
+        <div class="feature-card">
+            <div class="icon">🎙️</div>
+            <h3>VoiceGuard</h3>
+            <p>
+                Activate an emergency workflow using a
+                predefined voice command.
+            </p>
+        </div>
+
+
+        <div class="feature-card">
+            <div class="icon">👥</div>
+            <h3>SafeCircle</h3>
+            <p>
+                Manage trusted contacts for emergency
+                notifications and support.
+            </p>
+        </div>
+
+
+        <div class="feature-card">
+            <div class="icon">🧭</div>
+            <h3>Journey Guardian</h3>
+            <p>
+                Monitor your journey and receive
+                arrival check-in reminders.
+            </p>
+        </div>
+
+
+        <div class="feature-card">
+            <div class="icon">🤖</div>
+            <h3>AI Safety Assistant</h3>
+            <p>
+                Get helpful safety information and
+                emergency guidance.
+            </p>
+        </div>
+
+
+        <div class="feature-card">
+            <div class="icon">🗺️</div>
+            <h3>Safety Map</h3>
+            <p>
+                Explore community-reported safety
+                concerns and nearby emergency facilities.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- About Section -->
+<section class="about" id="about">
+
+    <h2>About SHAKTI AI</h2>
+
+    <p>
+        SHAKTI AI aims to combine artificial intelligence
+        and modern technology to make safety assistance
+        more accessible. Our vision is to empower women
+        through intelligent tools, awareness and support.
+    </p>
+
+</section>
+
+
+<!-- Footer -->
+<footer id="contact">
+
+    <h2>SHAKTI <span>AI</span></h2>
+
+    <p>
+        Smart Help & Assistance for Keeping Women Independent.
+    </p>
+
+    <p class="copyright">
+        © 2026 SHAKTI AI. All Rights Reserved.
+    </p>
+
+</footer>
+
+
+<!-- SOS AND GPS JAVASCRIPT -->
+<script>
+
+    // ACTIVATE SOS
+    function activateSOS() {
+
+        const confirmation = confirm(
+            "SOS EMERGENCY\n\n" +
+            "Do you want to activate emergency assistance?"
+        );
+
+        if (confirmation) {
+            getUserLocation();
+        }
+
+    }
+
+
+    // DETECT CURRENT LOCATION
+    function getUserLocation() {
+
+        if (!navigator.geolocation) {
+
+            alert("GPS is not supported by your browser.");
+            return;
+
+        }
+
+        const sosButton =
+            document.querySelector(".sos-button");
+
+        sosButton.disabled = true;
+        sosButton.innerText = "Detecting Location...";
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            async function(position) {
+
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+
+                const mapURL =
+                    "https://www.google.com/maps?q=" +
+                    latitude + "," + longitude;
+
+                sosButton.innerText =
+                    "Processing Demo Notifications...";
+
+
+                try {
+
+                    const response = await fetch(
+                        "/api/sos/prepare",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                latitude: latitude,
+                                longitude: longitude,
+                                accuracy: accuracy
+                            })
+                        }
+                    );
+
+
+                    const result = await response.json();
+
+                    sosButton.disabled = false;
+                    sosButton.innerText = "🚨 SOS EMERGENCY";
+
+
+                    let statusMessage = "";
+
+
+                    if (result.success) {
+
+                        statusMessage =
+                            "DEMO SOS PROCESSING COMPLETED!\n\n" +
+                            "User: " + result.user_name + "\n" +
+                            "SafeCircle Contacts: " +
+                            result.contact_count + "\n\n" +
+                            "Successfully Processed: " +
+                            result.successful_count + "\n" +
+                            "Failed: " + result.failed_count + "\n\n";
+
+
+                        result.notification_results.forEach(
+                            function(contact) {
+
+                                statusMessage +=
+                                    contact.name + " : " +
+                                    contact.status + "\n";
+
+                            }
+                        );
+
+
+                        statusMessage +=
+                            "\nIMPORTANT:\n" +
+                            "This is DEMO MODE.\n" +
+                            "No actual SMS has been sent.";
+
+                    }
+
+                    else if (result.login_required) {
+
+                        statusMessage =
+                            "LOCATION DETECTED!\n\n" +
+                            "Please login to access your " +
+                            "SafeCircle contacts.\n\n" +
+                            "No notification has been sent.";
+
+                    }
+
+                    else {
+
+                        statusMessage =
+                            "SOS PROCESSING FAILED!\n\n" +
+                            result.message;
+
+                    }
+
+
+                    const openMap = confirm(
+
+                        statusMessage + "\n\n" +
+                        "Latitude: " + latitude + "\n" +
+                        "Longitude: " + longitude + "\n" +
+                        "GPS Accuracy: " +
+                        Math.round(accuracy) + " metres.\n\n" +
+                        "Click OK to open Google Maps."
+
+                    );
+
+
+                    if (openMap) {
+
+                        window.location.href = mapURL;
+
+                    }
+
+                }
+
+                catch (error) {
+
+                    sosButton.disabled = false;
+
+                    sosButton.innerText = "🚨 SOS EMERGENCY";
+
+                    alert(
+                        "Location detected, but the server " +
+                        "could not process the demo notifications."
+                    );
+
+                    console.error(error);
+
+                }
+
+            },
+
+
+            // GPS ERROR HANDLING
+            function(error) {
+
+                sosButton.disabled = false;
+
+                sosButton.innerText = "🚨 SOS EMERGENCY";
+
+                alert(
+                    "Unable to detect location: " +
+                    error.message
+                );
+
+            },
+
+
+            // GPS SETTINGS
+            {
+                enableHighAccuracy: true,
+                timeout: 20000,
+                maximumAge: 0
+            }
+
+        );
+
+    }
+
+</script>
+
+</body>
+
+</html>

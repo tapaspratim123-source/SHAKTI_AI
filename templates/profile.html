@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile | SHAKTI AI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .profile-container {
+            max-width: 650px;
+            margin: 50px auto;
+            padding: 35px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .profile-heading {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-heading h1 {
+            color: #762b91;
+            margin-bottom: 8px;
+        }
+
+        .profile-heading p {
+            color: #777;
+        }
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a044c4, #e65c9c);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            font-weight: bold;
+        }
+
+        .profile-form label {
+            display: block;
+            margin: 18px 0 8px;
+            color: #444;
+            font-weight: 600;
+        }
+
+        .profile-form input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .profile-form input:focus {
+            outline: none;
+            border-color: #a044c4;
+            box-shadow: 0 0 5px rgba(160, 68, 196, 0.2);
+        }
+
+        .profile-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .profile-buttons button,
+        .profile-buttons a {
+            flex: 1;
+            min-width: 130px;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background: #8735a5;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #692582;
+        }
+
+        .back-btn {
+            background: #f0e7f4;
+            color: #762b91;
+        }
+
+        .back-btn:hover {
+            background: #e5d5ed;
+        }
+
+        .profile-message {
+            padding: 12px;
+            margin-bottom: 18px;
+            background: #f5eafa;
+            color: #762b91;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .profile-container {
+                margin: 25px 15px;
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="profile-container">
+
+        <div class="profile-heading">
+
+            <div class="profile-avatar">
+                {{ user['name'][0]|upper }}
+            </div>
+
+            <h1>My Profile</h1>
+
+            <p>View and manage your SHAKTI AI account details.</p>
+
+        </div>
+
+
+        <!-- FLASH MESSAGES -->
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="profile-message">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+        <!-- PROFILE FORM -->
+
+        <form class="profile-form" method="POST">
+
+            <label for="name">Full Name</label>
+
+            <input
+                type="text"
+                id="name"
+                name="name"
+                value="{{ user['name'] }}"
+                placeholder="Enter your full name"
+                required
+            >
+
+
+            <label for="email">Email Address</label>
+
+            <input
+                type="email"
+                id="email"
+                name="email"
+                value="{{ user['email'] }}"
+                placeholder="Enter your email address"
+                required
+            >
+
+
+            <div class="profile-buttons">
+
+                <button type="submit" class="save-btn">
+                    Save Changes
+                </button>
+
+                <a href="{{ url_for('dashboard') }}" class="back-btn">
+                    Back to Dashboard
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</body>
+</html>
+

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SafeCircle | SHAKTI AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="dashboard-header">
+
+        <div class="logo">
+            SHAKTI AI
+        </div>
+
+        <nav>
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+
+    </header>
+
+
+    <!-- SAFECIRCLE MAIN SECTION -->
+    <main class="safecircle-container">
+
+        <section class="safecircle-heading">
+
+            <span>YOUR PERSONAL SAFETY NETWORK</span>
+
+            <h1>SafeCircle</h1>
+
+            <p>
+                Add trusted people who can support you during an emergency.
+            </p>
+
+        </section>
+
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="safe-message">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+        <!-- ADD CONTACT FORM -->
+        <section class="contact-form-card">
+
+            <h2>+ Add Trusted Contact</h2>
+
+            <form action="{{ url_for('add_contact') }}" method="POST">
+
+                <label for="name">Contact Name</label>
+
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter contact name"
+                    required
+                >
+
+                <label for="phone">Phone Number</label>
+
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Enter phone number"
+                    required
+                >
+
+                <label for="relationship">Relationship</label>
+
+                <select id="relationship" name="relationship" required>
+
+                    <option value="">Select Relationship</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Father">Father</option>
+                    <option value="Brother">Brother</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Friend">Friend</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Other">Other</option>
+
+                </select>
+
+                <button type="submit" class="add-contact-btn">
+                    Save Contact
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- SAVED CONTACTS -->
+        <section class="saved-contacts">
+
+            <h2>My Trusted Contacts</h2>
+
+            <p>People you've added to your safety network.</p>
+
+
+            {% if contacts %}
+
+                <div class="contacts-grid">
+
+                    {% for contact in contacts %}
+
+                        <div class="contact-card">
+
+                            <div class="contact-avatar">👥</div>
+
+                            <h3>{{ contact['name'] }}</h3>
+
+                            <p>{{ contact['relationship'] }}</p>
+
+                            <p class="contact-phone">
+                                {{ contact['phone'] }}
+                            </p>
+
+                            <div class="contact-actions">
+
+                                <a
+                                    href="{{ url_for('edit_contact', contact_id=contact['id']) }}"
+                                    class="edit-btn">
+                                    Edit
+                                </a>
+
+                                <form
+                                    action="{{ url_for('delete_contact', contact_id=contact['id']) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete this contact?');">
+
+                                    <button type="submit" class="delete-btn">
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-contacts">
+
+                    <div>👥</div>
+
+                    <h3>No Trusted Contacts Yet</h3>
+
+                    <p>
+                        Add your first trusted contact to build your
+                        personal safety network.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <h2>SHAKTI AI</h2>
+
+        <p>
+            Smart Help & Assistance for Keeping Women Independent.
+        </p>
+
+        <p class="copyright">
+            © 2026 SHAKTI AI. All Rights Reserved.
+        </p>
+
+    </footer>
+
+</body>
+
+</html>
