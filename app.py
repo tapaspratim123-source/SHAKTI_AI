@@ -20,7 +20,7 @@ from werkzeug.security import (
 
 app = Flask(__name__)
 
-app.secret_key = "change_this_to_a_random_secret_before_deployment"
+app.secret_key = os.environ.get("SECRET_KEY", "local-development-only")
 
 DATABASE = os.path.join(app.root_path, "shakti.db")
 

@@ -1,10 +1,12 @@
+/* =====================================================
+   SHAKTI AI - COMPLETE WEBSITE STYLESHEET
+   Purple & Pink Theme
+===================================================== */
 
-/* =========================================
-   SHAKTI AI - COMPLETE STYLESHEET
-   Purple and Pink Theme
-========================================= */
 
-/* GENERAL SETTINGS */
+/* =====================================================
+   1. GENERAL SETTINGS
+===================================================== */
 
 * {
     margin: 0;
@@ -25,10 +27,17 @@ body {
 
 a {
     transition: 0.3s;
+    text-decoration: none;
+}
+
+button {
+    font-family: inherit;
 }
 
 
-/* NAVIGATION BAR */
+/* =====================================================
+   2. ORIGINAL NAVIGATION BAR
+===================================================== */
 
 .navbar {
     display: flex;
@@ -57,7 +66,6 @@ footer span {
 }
 
 .nav-links a {
-    text-decoration: none;
     color: #393044;
     font-weight: 500;
 }
@@ -67,7 +75,6 @@ footer span {
 }
 
 .nav-button {
-    text-decoration: none;
     background: #54258a;
     color: white;
     padding: 11px 23px;
@@ -75,7 +82,9 @@ footer span {
 }
 
 
-/* HERO SECTION */
+/* =====================================================
+   3. ORIGINAL HERO SECTION
+===================================================== */
 
 .hero {
     min-height: 540px;
@@ -121,7 +130,6 @@ footer span {
 
 .primary-btn,
 .secondary-btn {
-    text-decoration: none;
     padding: 14px 25px;
     border-radius: 8px;
     font-weight: bold;
@@ -136,9 +144,6 @@ footer span {
     border: 2px solid #54258a;
     color: #54258a;
 }
-
-
-/* HERO CARD */
 
 .hero-card {
     width: 300px;
@@ -174,7 +179,9 @@ footer span {
 }
 
 
-/* EMERGENCY SECTION */
+/* =====================================================
+   4. ORIGINAL EMERGENCY SECTION
+===================================================== */
 
 .emergency {
     text-align: center;
@@ -208,14 +215,10 @@ footer span {
     background: #bd1727;
 }
 
-.emergency small {
-    display: block;
-    margin-top: 15px;
-    color: #888;
-}
 
-
-/* HOMEPAGE FEATURES */
+/* =====================================================
+   5. ORIGINAL FEATURES SECTION
+===================================================== */
 
 .features {
     padding: 80px 8%;
@@ -277,7 +280,9 @@ footer span {
 }
 
 
-/* ABOUT SECTION */
+/* =====================================================
+   6. ORIGINAL ABOUT SECTION
+===================================================== */
 
 .about {
     padding: 75px 15%;
@@ -297,7 +302,9 @@ footer span {
 }
 
 
-/* FOOTER */
+/* =====================================================
+   7. ORIGINAL FOOTER
+===================================================== */
 
 footer {
     background: #28153e;
@@ -321,7 +328,9 @@ footer p {
 }
 
 
-/* LOGIN AND REGISTRATION */
+/* =====================================================
+   8. LOGIN AND REGISTRATION
+===================================================== */
 
 .auth-page {
     min-height: 100vh;
@@ -394,7 +403,6 @@ footer p {
 
 .auth-container a {
     color: #54258a;
-    text-decoration: none;
     font-weight: 600;
 }
 
@@ -407,7 +415,9 @@ footer p {
 }
 
 
-/* DASHBOARD HEADER */
+/* =====================================================
+   9. DASHBOARD HEADER
+===================================================== */
 
 .dashboard-header {
     display: flex;
@@ -424,7 +434,6 @@ footer p {
 }
 
 .dashboard-header nav a {
-    text-decoration: none;
     color: #54258a;
     font-weight: 600;
 }
@@ -434,7 +443,9 @@ footer p {
 }
 
 
-/* DASHBOARD MAIN SECTION */
+/* =====================================================
+   10. DASHBOARD MAIN SECTION
+===================================================== */
 
 .dashboard-container {
     min-height: 80vh;
@@ -462,7 +473,9 @@ footer p {
 }
 
 
-/* DASHBOARD GRID */
+/* =====================================================
+   11. DASHBOARD GRID
+===================================================== */
 
 .dashboard-grid {
     display: grid;
@@ -507,9 +520,6 @@ footer p {
     margin-bottom: 20px;
 }
 
-
-/* COMING SOON */
-
 .coming-soon {
     display: inline-block;
     padding: 8px 15px;
@@ -520,16 +530,12 @@ footer p {
     font-weight: 600;
 }
 
-
-/* DASHBOARD BUTTONS */
-
 .dashboard-grid .edit-btn,
 .dashboard-grid .card-btn {
     display: inline-block;
     padding: 11px 20px;
     background: #54258a;
     color: white;
-    text-decoration: none;
     border-radius: 8px;
     font-weight: 600;
 }
@@ -540,7 +546,9 @@ footer p {
 }
 
 
-/* SAFECIRCLE PAGE */
+/* =====================================================
+   12. SAFECIRCLE PAGE
+===================================================== */
 
 .safecircle-container {
     padding: 55px 8%;
@@ -610,9 +618,6 @@ footer p {
     border-color: #54258a;
 }
 
-
-/* SAVE CONTACT BUTTON */
-
 .add-contact-btn {
     width: 100%;
     margin-top: 25px;
@@ -629,9 +634,6 @@ footer p {
 .add-contact-btn:hover {
     background: #a33bb9;
 }
-
-
-/* FLASH MESSAGE */
 
 .safe-message {
     max-width: 600px;
@@ -698,9 +700,6 @@ footer p {
     font-weight: 600;
 }
 
-
-/* CONTACT ACTION BUTTONS */
-
 .contact-actions {
     display: flex;
     justify-content: center;
@@ -720,7 +719,6 @@ footer p {
     border: none;
     border-radius: 7px;
     cursor: pointer;
-    text-decoration: none;
     font-size: 14px;
     font-weight: 600;
 }
@@ -742,9 +740,6 @@ footer p {
 .delete-btn:hover {
     background: #bd1727;
 }
-
-
-/* EMPTY CONTACTS */
 
 .empty-contacts {
     background: white;
@@ -769,14 +764,9 @@ footer p {
 }
 
 
-/* EDIT CONTACT PAGE */
-
-.auth-container a:hover {
-    color: #d83f89;
-}
-
-
-/* FOOTER FOR APPLICATION PAGES */
+/* =====================================================
+   13. APPLICATION FOOTER
+===================================================== */
 
 .footer {
     background: #28153e;
@@ -795,73 +785,1034 @@ footer p {
 }
 
 
-/* RESPONSIVE DESIGN */
+/* =====================================================
+   14. SHAKTI AI HOMEPAGE - BODY
+===================================================== */
 
-@media (max-width: 900px) {
+.home-page {
+    margin: 0;
+    padding: 0;
+    background: #fffaff;
+    color: #302044;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+}
+
+.home-page * {
+    box-sizing: border-box;
+}
+
+.home-page a {
+    text-decoration: none;
+}
+
+
+/* =====================================================
+   15. HOMEPAGE NAVIGATION
+===================================================== */
+
+.home-header {
+    width: 100%;
+    background: #ffffff;
+    box-shadow: 0 3px 20px rgba(70, 35, 90, 0.06);
+    position: relative;
+    z-index: 20;
+}
+
+.home-navbar {
+    width: 100%;
+    max-width: 1400px;
+    min-height: 82px;
+    margin: auto;
+    padding: 15px 7%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+}
+
+.home-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    color: #6636a5;
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.home-logo > span:last-child {
+    color: #e45b9c;
+}
+
+.logo-symbol {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    color: white !important;
+    background: linear-gradient(135deg, #7541b8, #d65a9d);
+}
+
+.home-nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.home-nav-links li {
+    list-style: none;
+}
+
+.home-nav-links a {
+    color: #51465f;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.home-nav-links a:hover {
+    color: #bd58a5;
+}
+
+.home-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    white-space: nowrap;
+}
+
+.home-login {
+    color: #6636a5;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.home-get-started {
+    padding: 12px 21px;
+    color: white;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #7541b8, #d65a9d);
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 5px 15px rgba(150, 65, 175, 0.2);
+}
+
+.home-get-started:hover {
+    transform: translateY(-2px);
+}
+
+
+/* =====================================================
+   16. HOMEPAGE HERO SECTION
+===================================================== */
+
+.home-hero {
+    position: relative;
+    min-height: 620px;
+    padding: 75px 8%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 60px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 85% 20%, #f6dafa 0, transparent 32%),
+        linear-gradient(120deg, #fff8fd, #f5edff);
+}
+
+.home-hero-content {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    max-width: 590px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 17px;
+    border-radius: 30px;
+    background: #f1e3fb;
+    color: #8145ad;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+}
+
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d65a9d;
+}
+
+.home-hero h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(46px, 5vw, 68px);
+    line-height: 1.15;
+    color: #302044;
+    margin: 0 0 22px;
+}
+
+.home-hero h1 span {
+    color: #bd58a5;
+}
+
+.home-hero-description {
+    max-width: 540px;
+    color: #71677c;
+    font-size: 16px;
+    line-height: 1.9;
+    margin-bottom: 28px;
+}
+
+.home-hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+
+.hero-primary-button,
+.hero-secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 25px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.3s;
+}
+
+.hero-primary-button {
+    color: white;
+    background: linear-gradient(135deg, #7541b8, #d65a9d);
+    box-shadow: 0 8px 20px rgba(135, 63, 170, 0.22);
+}
+
+.hero-secondary-button {
+    color: #7843a9;
+    border: 1.5px solid #b98bd2;
+    background: white;
+}
+
+.hero-primary-button:hover,
+.hero-secondary-button:hover {
+    transform: translateY(-4px);
+}
+
+.hero-trust-note {
+    margin-top: 30px;
+    color: #85758f;
+    font-size: 13px;
+}
+
+.hero-trust-note span {
+    color: #d65a9d;
+    margin-right: 6px;
+}
+
+
+/* HERO DECORATION */
+
+.hero-background-circle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.circle-one {
+    width: 300px;
+    height: 300px;
+    top: -130px;
+    right: 25%;
+    background: rgba(220, 177, 245, 0.18);
+}
+
+.circle-two {
+    width: 220px;
+    height: 220px;
+    bottom: -120px;
+    left: 30%;
+    background: rgba(244, 174, 213, 0.2);
+}
+
+
+/* =====================================================
+   17. HOMEPAGE HERO VISUAL
+===================================================== */
+
+.home-hero-visual {
+    flex: 0 0 430px;
+    min-height: 430px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visual-glow {
+    position: absolute;
+    width: 330px;
+    height: 330px;
+    border-radius: 50%;
+    background: #ead5fa;
+    filter: blur(35px);
+    opacity: 0.7;
+}
+
+.safety-orbit {
+    position: absolute;
+    border: 1px solid rgba(153, 94, 190, 0.2);
+    border-radius: 50%;
+}
+
+.orbit-one {
+    width: 390px;
+    height: 390px;
+}
+
+.orbit-two {
+    width: 340px;
+    height: 340px;
+}
+
+.safety-main-card {
+    position: relative;
+    z-index: 2;
+    width: 290px;
+    min-height: 340px;
+    padding: 25px;
+    border-radius: 28px;
+    color: white;
+    background: linear-gradient(145deg, #824ac1, #df70aa);
+    box-shadow: 0 25px 55px rgba(120, 60, 160, 0.25);
+    text-align: center;
+}
+
+.safety-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.live-indicator {
+    font-size: 9px;
+    color: #fff0fa;
+}
+
+.live-indicator span {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 4px;
+    border-radius: 50%;
+    background: #9cffc2;
+}
+
+.safety-shield {
+    width: 120px;
+    height: 120px;
+    margin: 35px auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.18);
+    clip-path: polygon(50% 0, 92% 17%, 85% 70%, 50% 100%, 15% 70%, 8% 17%);
+}
+
+.shield-inner {
+    color: white;
+    font-size: 65px;
+}
+
+.safety-main-card h2 {
+    font-size: 24px;
+    margin: 10px 0 5px;
+}
+
+.safety-main-card > p {
+    color: #fff0fa;
+    font-size: 13px;
+}
+
+.safety-card-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.25);
+    margin: 22px 0;
+}
+
+.safety-card-bottom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+}
+
+.bottom-icon {
+    font-size: 25px;
+}
+
+.safety-card-bottom strong,
+.safety-card-bottom small {
+    display: block;
+}
+
+.safety-card-bottom strong {
+    font-size: 11px;
+}
+
+.safety-card-bottom small {
+    margin-top: 4px;
+    color: #f8e8fa;
+    font-size: 10px;
+}
+
+.floating-card {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 17px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(60, 30, 80, 0.13);
+}
+
+.floating-card > span {
+    font-size: 25px;
+}
+
+.floating-card strong,
+.floating-card small {
+    display: block;
+}
+
+.floating-card strong {
+    color: #5e397e;
+    font-size: 12px;
+}
+
+.floating-card small {
+    color: #96889e;
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.floating-one {
+    top: 55px;
+    left: -5px;
+}
+
+.floating-two {
+    right: -5px;
+    bottom: 55px;
+}
+
+
+/* =====================================================
+   18. HIGHLIGHT STRIP
+===================================================== */
+
+.home-highlight-strip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 55px;
+    padding: 27px 7%;
+    background: white;
+    border-bottom: 1px solid #f1e6f5;
+}
+
+.home-highlight-strip div {
+    color: #6e5682;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.home-highlight-strip span {
+    color: #d65a9d;
+    margin-right: 8px;
+}
+
+
+/* =====================================================
+   19. HOMEPAGE EMERGENCY SECTION
+===================================================== */
+
+.home-emergency {
+    padding: 55px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    background: #fff8fc;
+}
+
+.emergency-content {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.emergency-icon {
+    width: 65px;
+    height: 65px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffe9ef;
+    border-radius: 18px;
+    font-size: 30px;
+}
+
+.home-section-label {
+    color: #c04d98;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.home-emergency h2 {
+    color: #342044;
+    font-size: 28px;
+    margin: 5px 0;
+}
+
+.home-emergency p {
+    max-width: 570px;
+    color: #786c82;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.emergency-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.home-sos-button {
+    padding: 16px 30px;
+    border: none;
+    border-radius: 40px;
+    background: linear-gradient(135deg, #e43e70, #bd2860);
+    color: white;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(220, 45, 105, 0.25);
+    transition: 0.3s;
+}
+
+.home-sos-button:hover {
+    transform: translateY(-4px);
+}
+
+.home-sos-button:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.emergency-action small {
+    margin-top: 10px;
+    color: #988b9d;
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   20. HOMEPAGE FEATURES
+===================================================== */
+
+.home-features {
+    padding: 85px 8%;
+    background: #fcf9ff;
+}
+
+.home-section-heading {
+    max-width: 650px;
+    margin: 0 auto 45px;
+    text-align: center;
+}
+
+.home-section-heading h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #342044;
+    font-size: 39px;
+    margin: 12px 0;
+}
+
+.home-section-heading h2 span {
+    color: #bd58a5;
+}
+
+.home-section-heading p {
+    color: #796d83;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.home-feature-grid {
+    max-width: 1200px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 25px;
+}
+
+.home-feature-card {
+    min-height: 245px;
+    position: relative;
+    padding: 30px;
+    border-radius: 21px;
+    background: white;
+    border: 1px solid #f0e5f5;
+    box-shadow: 0 8px 25px rgba(80, 40, 100, 0.05);
+    transition: 0.3s;
+}
+
+.home-feature-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 15px 35px rgba(100, 50, 130, 0.12);
+}
+
+.feature-icon {
+    width: 57px;
+    height: 57px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 17px;
+    font-size: 27px;
+    margin-bottom: 22px;
+}
+
+.feature-number {
+    position: absolute;
+    top: 32px;
+    right: 30px;
+    color: #c8b7d3;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.home-feature-card h3 {
+    color: #4b2b67;
+    font-size: 19px;
+    margin-bottom: 10px;
+}
+
+.home-feature-card p {
+    max-width: 300px;
+    color: #7d7287;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.feature-arrow {
+    position: absolute;
+    right: 28px;
+    bottom: 25px;
+    color: #b36ab7;
+    font-size: 22px;
+}
+
+.feature-purple .feature-icon {
+    background: #f0e6ff;
+}
+
+.feature-pink .feature-icon {
+    background: #ffe8f2;
+}
+
+.feature-blue .feature-icon {
+    background: #e6f1ff;
+}
+
+.feature-orange .feature-icon {
+    background: #fff0e4;
+}
+
+.feature-green .feature-icon {
+    background: #e5f7ed;
+}
+
+.feature-violet .feature-icon {
+    background: #eeeaff;
+}
+
+
+/* =====================================================
+   21. HOMEPAGE ABOUT SECTION
+===================================================== */
+
+.home-about {
+    padding: 90px 9%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 90px;
+    background: linear-gradient(120deg, #f8efff, #fff4fa);
+}
+
+.about-visual {
+    flex: 0 0 350px;
+    min-height: 330px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-circle {
+    width: 260px;
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #824ac1, #df70aa);
+    box-shadow: 0 20px 50px rgba(120, 60, 160, 0.2);
+}
+
+.about-circle span {
+    color: white;
+    font-size: 125px;
+}
+
+.about-small-card {
+    position: absolute;
+    bottom: 10px;
+    right: -5px;
+    padding: 15px 20px;
+    background: white;
+    color: #694481;
+    border-radius: 13px;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 8px 25px rgba(60, 30, 80, 0.12);
+}
+
+.about-small-card span {
+    color: #d65a9d;
+    margin-right: 5px;
+}
+
+.about-content {
+    max-width: 560px;
+}
+
+.about-content h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #342044;
+    font-size: 37px;
+    line-height: 1.3;
+    margin: 15px 0 20px;
+}
+
+.about-content h2 span {
+    color: #bd58a5;
+}
+
+.about-content p {
+    color: #746980;
+    font-size: 15px;
+    line-height: 1.9;
+    margin-bottom: 14px;
+}
+
+.about-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 13px 24px;
+    border-radius: 30px;
+    color: white;
+    background: linear-gradient(135deg, #7541b8, #d65a9d);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   22. HOMEPAGE FINAL CTA
+===================================================== */
+
+.home-cta {
+    margin: 75px 8%;
+    padding: 60px 30px;
+    text-align: center;
+    border-radius: 28px;
+    color: white;
+    background: linear-gradient(120deg, #7040ad, #d45b9c);
+    box-shadow: 0 15px 35px rgba(130, 60, 160, 0.2);
+}
+
+.home-cta > span {
+    color: #f9dff2;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.home-cta h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 36px;
+    margin: 15px 0;
+}
+
+.home-cta h2 span {
+    color: #ffe0f2;
+}
+
+.home-cta p {
+    color: #f9eafa;
+    margin-bottom: 25px;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 30px;
+    background: white;
+    color: #8244a9;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+/* =====================================================
+   23. HOMEPAGE FOOTER
+===================================================== */
+
+.home-footer {
+    padding: 55px 8% 20px;
+    background: #291b38;
+    color: #e8dced;
+}
+
+.footer-main {
+    max-width: 1200px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 55px;
+    padding-bottom: 40px;
+}
+
+.footer-logo {
+    color: white;
+}
+
+.footer-brand p {
+    max-width: 300px;
+    margin-top: 18px;
+    color: #c9b8d0;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.footer-links h3 {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.footer-links a {
+    color: #c9b8d0;
+    font-size: 13px;
+}
+
+.footer-links a:hover {
+    color: #f18abd;
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.13);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.footer-bottom p {
+    color: #bcaec5;
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   24. RESPONSIVE TABLET DESIGN
+===================================================== */
+
+@media (max-width: 1000px) {
+
+    .home-navbar {
+        padding-left: 4%;
+        padding-right: 4%;
+        gap: 15px;
+    }
+
+    .home-nav-links {
+        gap: 17px;
+    }
+
+    .home-hero {
+        padding-left: 5%;
+        padding-right: 5%;
+        gap: 25px;
+    }
+
+    .home-hero-visual {
+        flex-basis: 380px;
+    }
+
+    .home-feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-about {
+        gap: 40px;
+    }
 
     .dashboard-grid,
     .contacts-grid,
     .feature-container {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
 }
 
-@media (max-width: 768px) {
 
-    .navbar {
+/* =====================================================
+   25. RESPONSIVE MOBILE DESIGN
+===================================================== */
+
+@media (max-width: 760px) {
+
+    .home-navbar {
         flex-direction: column;
-        gap: 20px;
+        justify-content: center;
+        gap: 17px;
+        padding: 18px 5%;
     }
 
-    .nav-links {
+    .home-nav-links {
         flex-wrap: wrap;
         justify-content: center;
-        gap: 15px;
+        gap: 15px 22px;
     }
 
-    .hero {
+    .home-nav-actions {
+        justify-content: center;
+    }
+
+    .home-hero {
         flex-direction: column;
         text-align: center;
         padding: 60px 6%;
     }
 
-    .hero h1 {
-        font-size: 37px;
-    }
-
-    .hero-buttons {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .hero-card {
+    .home-hero-content {
         width: 100%;
     }
 
-    .section-heading h2 {
-        font-size: 27px;
+    .home-hero-description {
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    .about {
-        padding: 60px 8%;
+    .home-hero-buttons {
+        justify-content: center;
     }
 
-    .safecircle-container {
-        padding: 35px 6%;
+    .hero-trust-note {
+        line-height: 1.7;
     }
 
-    .safecircle-heading h1 {
-        font-size: 32px;
+    .home-hero-visual {
+        width: 100%;
+        flex-basis: auto;
+        min-height: 400px;
     }
 
-    .contact-form-card {
-        padding: 25px;
+    .floating-one {
+        left: 0;
     }
 
-}
+    .floating-two {
+        right: 0;
+    }
 
-@media (max-width: 600px) {
+    .home-emergency {
+        flex-direction: column;
+        text-align: center;
+        padding: 50px 6%;
+    }
+
+    .emergency-content {
+        flex-direction: column;
+    }
+
+    .home-feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-about {
+        flex-direction: column;
+        gap: 35px;
+        padding: 65px 7%;
+        text-align: center;
+    }
+
+    .about-content {
+        max-width: 100%;
+    }
+
+    .about-visual {
+        width: 100%;
+        flex-basis: auto;
+    }
+
+    .footer-main {
+        grid-template-columns: 1fr 1fr;
+        gap: 35px;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
 
     .dashboard-header {
         flex-direction: column;
@@ -881,6 +1832,125 @@ footer p {
         font-size: 29px;
     }
 
+    .safecircle-container {
+        padding: 35px 6%;
+    }
+
+    .safecircle-heading h1 {
+        font-size: 32px;
+    }
+
+    .contact-form-card {
+        padding: 25px;
+    }
+
+    .about {
+        padding: 60px 8%;
+    }
+}
+
+
+/* =====================================================
+   26. SMALL MOBILE DESIGN
+===================================================== */
+
+@media (max-width: 480px) {
+
+    .home-logo {
+        font-size: 21px;
+    }
+
+    .home-nav-links {
+        gap: 12px 17px;
+    }
+
+    .home-nav-links a {
+        font-size: 12px;
+    }
+
+    .home-hero h1 {
+        font-size: 43px;
+    }
+
+    .home-hero-visual {
+        min-height: 350px;
+    }
+
+    .safety-main-card {
+        width: 250px;
+        min-height: 315px;
+    }
+
+    .safety-orbit.orbit-one {
+        width: 310px;
+        height: 310px;
+    }
+
+    .safety-orbit.orbit-two {
+        width: 280px;
+        height: 280px;
+    }
+
+    .floating-card {
+        padding: 10px;
+    }
+
+    .floating-card strong {
+        font-size: 10px;
+    }
+
+    .floating-card small {
+        font-size: 9px;
+    }
+
+    .home-highlight-strip {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .home-features {
+        padding: 60px 6%;
+    }
+
+    .home-section-heading h2 {
+        font-size: 31px;
+    }
+
+    .home-feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-feature-card {
+        min-height: 220px;
+    }
+
+    .about-circle {
+        width: 220px;
+        height: 220px;
+    }
+
+    .about-circle span {
+        font-size: 100px;
+    }
+
+    .about-content h2 {
+        font-size: 30px;
+    }
+
+    .home-cta {
+        margin: 50px 5%;
+        padding: 45px 20px;
+    }
+
+    .home-cta h2 {
+        font-size: 29px;
+    }
+
+    .footer-main {
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
     .dashboard-grid,
     .contacts-grid,
     .feature-container {
@@ -890,6 +1960,4 @@ footer p {
     .contact-actions {
         flex-wrap: wrap;
     }
-
 }
-
