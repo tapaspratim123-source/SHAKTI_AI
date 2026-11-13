@@ -1621,12 +1621,23 @@ footer p {
     color: white;
 }
 
-.footer-brand p {
-    max-width: 300px;
-    margin-top: 18px;
-    color: #c9b8d0;
-    font-size: 13px;
-    line-height: 1.8;
+.footer-brand p,
+.footer-tagline {
+    max-width: 320px;
+    margin-top: 15px;
+    color: #e2d4e8;
+    font-size: 13.5px;
+    line-height: 1.7;
+}
+
+.footer-bottom-credit {
+    color: #bcaec5;
+    font-size: 12px;
+}
+
+.creator-name-inline {
+    color: #ffffff;
+    font-weight: 600;
 }
 
 .footer-links {
