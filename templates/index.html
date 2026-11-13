@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>SHAKTI AI | Empowering Women</title>
 
     <!-- CSS -->
@@ -18,6 +20,95 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
           rel="stylesheet">
 
+    <style>
+        a.home-feature-card {
+            display: flex;
+            flex-direction: column;
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        a.home-feature-card:hover,
+        a.home-feature-card:visited {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .home-feature-card.card-disabled {
+            cursor: default;
+        }
+
+        .home-feature-card p {
+            flex-grow: 1;
+        }
+
+        .feature-badge-wrap {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            padding-right: 40px;
+        }
+
+        .feature-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            line-height: 1.3;
+        }
+
+        .badge-available {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .badge-demo {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-soon {
+            background: #f5f3ff;
+            color: #5b21b6;
+            border: 1px solid #ddd6fe;
+        }
+
+        .feature-badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .dot-available {
+            background: #10b981;
+        }
+
+        .dot-demo {
+            background: #f59e0b;
+        }
+
+        .dot-soon {
+            background: #8b5cf6;
+        }
+
+        .feature-arrow {
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        a.home-feature-card:hover .feature-arrow {
+            color: #8e3d92;
+            transform: translate(2px, -2px);
+        }
+    </style>
 </head>
 
 <body class="home-page">
@@ -265,24 +356,30 @@
 
             <div class="home-feature-grid">
 
-                <article class="home-feature-card feature-purple">
+                <a href="{{ url_for('sos_history') }}" class="home-feature-card feature-purple">
 
-                    <div class="feature-icon">📍</div>
+                    <div class="feature-icon">🚨</div>
                     <span class="feature-number">01</span>
 
-                    <h3>SafeRoute</h3>
+                    <h3>SOS History</h3>
 
                     <p>
-                        Explore routes with location-based
-                        safety information.
+                        Review previous emergency activations and simulated alerts.
                     </p>
+
+                    <div class="feature-badge-wrap">
+                        <span class="feature-status-badge badge-available">
+                            <span class="feature-badge-dot dot-available"></span>
+                            Available Now
+                        </span>
+                    </div>
 
                     <span class="feature-arrow">↗</span>
 
-                </article>
+                </a>
 
 
-                <article class="home-feature-card feature-pink">
+                <a href="{{ url_for('voiceguard') }}" class="home-feature-card feature-pink">
 
                     <div class="feature-icon">🎙️</div>
                     <span class="feature-number">02</span>
@@ -294,12 +391,19 @@
                         keyword detection.
                     </p>
 
+                    <div class="feature-badge-wrap">
+                        <span class="feature-status-badge badge-available">
+                            <span class="feature-badge-dot dot-available"></span>
+                            Available Now
+                        </span>
+                    </div>
+
                     <span class="feature-arrow">↗</span>
 
-                </article>
+                </a>
 
 
-                <article class="home-feature-card feature-blue">
+                <a href="{{ url_for('safecircle') }}" class="home-feature-card feature-blue">
 
                     <div class="feature-icon">👥</div>
                     <span class="feature-number">03</span>
@@ -311,12 +415,19 @@
                         for emergency support.
                     </p>
 
+                    <div class="feature-badge-wrap">
+                        <span class="feature-status-badge badge-available">
+                            <span class="feature-badge-dot dot-available"></span>
+                            Available Now
+                        </span>
+                    </div>
+
                     <span class="feature-arrow">↗</span>
 
-                </article>
+                </a>
 
 
-                <article class="home-feature-card feature-orange">
+                <a href="{{ url_for('journey_guardian') }}" class="home-feature-card feature-orange">
 
                     <div class="feature-icon">🧭</div>
                     <span class="feature-number">04</span>
@@ -328,12 +439,19 @@
                         expected arrival details.
                     </p>
 
+                    <div class="feature-badge-wrap">
+                        <span class="feature-status-badge badge-demo">
+                            <span class="feature-badge-dot dot-demo"></span>
+                            Interactive Demo
+                        </span>
+                    </div>
+
                     <span class="feature-arrow">↗</span>
 
-                </article>
+                </a>
 
 
-                <article class="home-feature-card feature-green">
+                <a href="{{ url_for('ai_safety_assistant') }}" class="home-feature-card feature-green">
 
                     <div class="feature-icon">🤖</div>
                     <span class="feature-number">05</span>
@@ -345,12 +463,19 @@
                         and guidance.
                     </p>
 
+                    <div class="feature-badge-wrap">
+                        <span class="feature-status-badge badge-available">
+                            <span class="feature-badge-dot dot-available"></span>
+                            Available Now
+                        </span>
+                    </div>
+
                     <span class="feature-arrow">↗</span>
 
-                </article>
+                </a>
 
 
-                <article class="home-feature-card feature-violet">
+                <article class="home-feature-card feature-violet card-disabled">
 
                     <div class="feature-icon">🗺️</div>
                     <span class="feature-number">06</span>
@@ -362,7 +487,12 @@
                         safety information.
                     </p>
 
-                    <span class="feature-arrow">↗</span>
+                    <div class="feature-badge-wrap">
+                        <span class="feature-status-badge badge-soon">
+                            <span class="feature-badge-dot dot-soon"></span>
+                            Coming Soon
+                        </span>
+                    </div>
 
                 </article>
 
@@ -563,7 +693,8 @@
                                 method: "POST",
 
                                 headers: {
-                                    "Content-Type": "application/json"
+                                    "Content-Type": "application/json",
+                                    "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || "{{ csrf_token() }}"
                                 },
 
                                 body: JSON.stringify({

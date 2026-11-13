@@ -1,2 +1,5 @@
 Flask
 gunicorn
+google-genai
+Flask-WTF
+

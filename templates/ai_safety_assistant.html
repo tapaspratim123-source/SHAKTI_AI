@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>AI Safety Assistant | SHAKTI AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .assistant-page {
+            background: linear-gradient(135deg, #f8edff 0%, #fff0f5 100%);
+            min-height: 100vh;
+            color: #29213d;
+        }
+
+        /* EMERGENCY NOTICE BANNER */
+        .emergency-banner {
+            background: linear-gradient(135deg, #bd1727 0%, #e32636 100%);
+            color: #ffffff;
+            padding: 16px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(227, 38, 54, 0.25);
+        }
+
+        .emergency-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .emergency-banner-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .emergency-banner strong {
+            display: block;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .emergency-banner p {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #ffe5e7;
+            margin: 0;
+        }
+
+        .call-112-btn {
+            background: #ffffff;
+            color: #bd1727;
+            padding: 10px 22px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: 0.25s;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .call-112-btn:hover {
+            background: #ffe5e7;
+            transform: scale(1.04);
+            color: #9a0f1c;
+        }
+
+        /* ASSISTANT CONTAINER */
+        .assistant-container {
+            max-width: 900px;
+            margin: 40px auto 60px;
+            padding: 0 20px;
+        }
+
+        /* HEADER CARD */
+        .assistant-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .assistant-header .assistant-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f4eaff;
+            color: #54258a;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .assistant-header h1 {
+            color: #54258a;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .assistant-header p {
+            color: #655c70;
+            font-size: 16px;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* MAIN CARD */
+        .assistant-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 8px 30px rgba(84, 37, 138, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #393044;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .input-group .input-hint {
+            display: block;
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .situation-textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 16px;
+            border: 2px solid #e5daf0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #29213d;
+            resize: vertical;
+            transition: 0.25s;
+            box-sizing: border-box;
+            background: #fbf9ff;
+        }
+
+        .situation-textarea:focus {
+            outline: none;
+            border-color: #54258a;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(84, 37, 138, 0.1);
+        }
+
+        .char-counter-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #777;
+        }
+
+        .char-counter.limit-near {
+            color: #d97706;
+            font-weight: bold;
+        }
+
+        .char-counter.limit-reached {
+            color: #e32636;
+            font-weight: bold;
+        }
+
+        /* QUICK SUGGESTIONS */
+        .quick-suggestions {
+            margin: 20px 0 25px;
+        }
+
+        .quick-suggestions span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #655c70;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .suggestion-chip {
+            background: #faf7ff;
+            border: 1px solid #e5daf0;
+            color: #54258a;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .suggestion-chip:hover {
+            background: #f4eaff;
+            border-color: #a33bb9;
+            transform: translateY(-2px);
+        }
+
+        /* ACTIONS ROW */
+        .assistant-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .analyze-btn {
+            background: #54258a;
+            color: #ffffff;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analyze-btn:hover:not(:disabled) {
+            background: #a33bb9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(84, 37, 138, 0.25);
+        }
+
+        .analyze-btn:disabled {
+            background: #bba2d3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .clear-btn {
+            background: #f3edf8;
+            color: #54258a;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: #e7daf2;
+        }
+
+        /* LOADING INDICATOR */
+        .loading-box {
+            display: none;
+            text-align: center;
+            padding: 35px 20px;
+            background: #faf7ff;
+            border-radius: 14px;
+            margin-top: 25px;
+            border: 1px dashed #cbb0e8;
+        }
+
+        .loading-spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid #e5daf0;
+            border-top: 4px solid #54258a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-box h3 {
+            color: #54258a;
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .loading-box p {
+            color: #777;
+            font-size: 14px;
+        }
+
+        /* ERROR BOX */
+        .error-alert {
+            display: none;
+            background: #fff2f2;
+            border-left: 4px solid #e32636;
+            color: #bd1727;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* RESULTS SECTION */
+        .results-section {
+            display: none;
+            margin-top: 35px;
+            border-top: 2px solid #f0e6f7;
+            padding-top: 35px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .results-header h2 {
+            color: #54258a;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assessment-badge {
+            background: #eef8f1;
+            color: #15803d;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* RISK CALLOUT CARD */
+        .risk-card {
+            background: #faf7ff;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 22px;
+            border-left: 6px solid #54258a;
+        }
+
+        .risk-card.risk-low {
+            background: #f0fdf4;
+            border-left-color: #16a34a;
+        }
+
+        .risk-card.risk-medium {
+            background: #fffbeb;
+            border-left-color: #d97706;
+        }
+
+        .risk-card.risk-high {
+            background: #fff7ed;
+            border-left-color: #ea580c;
+        }
+
+        .risk-card.risk-critical {
+            background: #fff1f2;
+            border-left-color: #e11d48;
+        }
+
+        .risk-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .risk-title-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .risk-level-tag {
+            font-size: 14px;
+            font-weight: 800;
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-low {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .tag-medium {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .tag-high {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .tag-critical {
+            background: #ffe4e6;
+            color: #be123c;
+        }
+
+        .summary-text {
+            color: #393044;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* STRUCTURED RESULT CARDS */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .result-block {
+            background: #ffffff;
+            border: 1px solid #ede4f5;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 3px 12px rgba(84, 37, 138, 0.03);
+        }
+
+        .result-block h3 {
+            color: #54258a;
+            font-size: 18px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-block ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .result-block li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
+            line-height: 1.6;
+            color: #443a50;
+            font-size: 15px;
+        }
+
+        .result-block li::before {
+            content: "•";
+            position: absolute;
+            left: 10px;
+            color: #a33bb9;
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        .actions-block {
+            border-left: 4px solid #54258a;
+        }
+
+        .actions-block li::before {
+            content: "✓";
+            position: absolute;
+            left: 8px;
+            color: #16a34a;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .missing-info-block {
+            border-left: 4px solid #d97706;
+        }
+
+        .missing-info-block li::before {
+            content: "?";
+            position: absolute;
+            left: 10px;
+            color: #d97706;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .details-block {
+            border-left: 4px solid #2563eb;
+        }
+
+        .details-block li::before {
+            content: "✦";
+            position: absolute;
+            left: 8px;
+            color: #2563eb;
+            font-size: 13px;
+        }
+
+        /* LIMITATIONS CARD */
+        .limitations-box {
+            background: #fbf9fc;
+            border: 1px dashed #cbb0e8;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-top: 10px;
+        }
+
+        .limitations-box h4 {
+            color: #655c70;
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .limitations-box p {
+            color: #655c70;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* HIGH RISK ESCALATION WARNING */
+        .high-risk-alert {
+            display: none;
+            background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+            border: 2px solid #e11d48;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .high-risk-alert h3 {
+            color: #be123c;
+            font-size: 18px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .high-risk-alert p {
+            color: #9f1239;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .escalation-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .sos-shortcut-btn {
+            background: #e32636;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .sos-shortcut-btn:hover {
+            background: #bd1727;
+        }
+
+        /* BOTTOM NAV */
+        .back-nav {
+            text-align: center;
+            margin-top: 35px;
+        }
+
+        .back-nav a {
+            color: #54258a;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .back-nav a:hover {
+            color: #d83f89;
+        }
+
+        @media (max-width: 768px) {
+            .emergency-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 14px 5%;
+            }
+
+            .call-112-btn {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+
+            .assistant-card {
+                padding: 22px 18px;
+            }
+
+            .assistant-header h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body class="assistant-page">
+
+    <!-- NATIONAL EMERGENCY NOTICE BANNER -->
+    <aside class="emergency-banner" role="alert" aria-label="National Emergency Helpline">
+        <div class="emergency-banner-content">
+            <span class="emergency-banner-icon">🚨</span>
+            <div>
+                <strong>IMMEDIATE EMERGENCY NOTICE (INDIA):</strong>
+                <p>
+                    If you are facing an active physical threat or emergency, <strong>do not wait for AI analysis</strong>.
+                    Call <strong>112</strong> (National Emergency Helpline) immediately or activate your emergency SOS.
+                </p>
+            </div>
+        </div>
+        <a href="tel:112" class="call-112-btn">📞 Call 112</a>
+    </aside>
+
+    <!-- NAVIGATION BAR -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                SHAKTI <span>AI</span>
+            </div>
+
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN ASSISTANT SECTION -->
+    <main class="assistant-container">
+
+        <section class="assistant-header">
+            <span class="assistant-badge">
+                <span>✦</span> GEMINI-POWERED SAFETY
+            </span>
+            <h1>AI Safety Assistant</h1>
+            <p>
+                Describe an uncomfortable, suspicious, or unsafe situation in your own words.
+                The assistant will assess risk factors and provide immediate protective guidance.
+            </p>
+        </section>
+
+        <!-- INPUT CARD -->
+        <section class="assistant-card">
+
+            <div class="input-group">
+                <label for="situationInput">Describe Your Current Situation</label>
+                <span class="input-hint">
+                    Include details like your surroundings, lighting, transport mode, whether you are alone, and any specific behavior noticed.
+                </span>
+
+                <textarea
+                    id="situationInput"
+                    class="situation-textarea"
+                    maxlength="2000"
+                    placeholder="Example: I am walking home from the metro station. The streetlights are out on this block and I noticed an unknown person walking about 20 steps behind me for the last 3 turns. I am feeling uneasy and not sure if I should run or enter a shop..."
+                ></textarea>
+
+                <div class="char-counter-container">
+                    <small>Minimum 10 characters recommended</small>
+                    <div class="char-counter" id="charCounter">
+                        <span id="charCount">0</span> / 2000 characters
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK SUGGESTIONS -->
+            <div class="quick-suggestions">
+                <span>Quick Scenario Examples:</span>
+                <div class="suggestion-chips">
+                    <button type="button" class="suggestion-chip" onclick="applySuggestion('Walking alone at night on an unlit road and noticed someone following me.')">
+                        🚶‍♀️ Being Followed at Night
+                    </button>
+                    <button type="button" class="suggestion-chip" onclick="applySuggestion('My cab driver took an unfamiliar detour through a deserted area and refused to explain why.')">
+                        🚕 Suspicious Cab Detour
+                    </button>
+                    <button type="button" class="suggestion-chip" onclick="applySuggestion('An unknown person is lingering outside my door and knocked twice without identifying themselves.')">
+                        🚪 Stranger Outside Door
+                    </button>
+                    <button type="button" class="suggestion-chip" onclick="applySuggestion('Feeling pressured and unsafe in an isolated office/workplace after hours with a coworker.')">
+                        🏢 Unsafe Workplace Situation
+                    </button>
+                </div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="assistant-actions">
+                <button
+                    type="button"
+                    id="analyzeBtn"
+                    class="analyze-btn"
+                    onclick="analyzeSituation()"
+                >
+                    <span>🤖</span> Analyze Situation
+                </button>
+
+                <button
+                    type="button"
+                    class="clear-btn"
+                    onclick="clearInput()"
+                >
+                    Clear Text
+                </button>
+            </div>
+
+            <!-- LOADING INDICATOR -->
+            <div id="loadingBox" class="loading-box" role="status" aria-live="polite">
+                <div class="loading-spinner"></div>
+                <h3>Analyzing Safety Situation...</h3>
+                <p>Gemini is assessing environmental risk factors, safety actions, and next steps.</p>
+            </div>
+
+            <!-- ERROR ALERT -->
+            <div id="errorAlert" class="error-alert" role="alert"></div>
+
+            <!-- RESULTS SECTION -->
+            <section id="resultsSection" class="results-section">
+
+                <div class="results-header">
+                    <h2>
+                        <span>🛡️</span> Safety Assessment Results
+                    </h2>
+                    <span class="assessment-badge">Advisory Guidance</span>
+                </div>
+
+                <!-- HIGH RISK ESCALATION WARNING (Visible for High / Critical) -->
+                <div id="highRiskAlert" class="high-risk-alert">
+                    <h3>⚠️ Elevated Risk Detected</h3>
+                    <p>
+                        Based on your description, this situation indicates serious potential danger.
+                        Prioritize your physical safety immediately. Avoid confrontation and move towards populated areas.
+                    </p>
+                    <div class="escalation-buttons">
+                        <a href="tel:112" class="call-112-btn">📞 Call 112 (Police / Emergency)</a>
+                        <a href="{{ url_for('home') }}" class="sos-shortcut-btn">🚨 Go to SOS Emergency</a>
+                    </div>
+                </div>
+
+                <!-- 1. RISK LEVEL & 2. SITUATION SUMMARY -->
+                <div id="riskCard" class="risk-card">
+                    <div class="risk-header-row">
+                        <div class="risk-title-area">
+                            <strong>Assessed Risk Level:</strong>
+                            <span id="riskLevelBadge" class="risk-level-tag">--</span>
+                        </div>
+                    </div>
+                    <p id="situationSummary" class="summary-text"></p>
+                </div>
+
+                <!-- STRUCTURED DETAILS GRID -->
+                <div class="results-grid">
+
+                    <!-- 3. EXTRACTED DETAILS -->
+                    <div class="result-block details-block">
+                        <h3>
+                            <span>🔍</span> Extracted Details & Factors
+                        </h3>
+                        <ul id="extractedDetailsList"></ul>
+                    </div>
+
+                    <!-- 4. RECOMMENDED SAFETY ACTIONS -->
+                    <div class="result-block actions-block">
+                        <h3>
+                            <span>✅</span> Recommended Safety Actions
+                        </h3>
+                        <ul id="recommendedActionsList"></ul>
+                    </div>
+
+                    <!-- 5. MISSING INFORMATION -->
+                    <div class="result-block missing-info-block">
+                        <h3>
+                            <span>❓</span> Missing / Unknown Information
+                        </h3>
+                        <ul id="missingInformationList"></ul>
+                    </div>
+
+                </div>
+
+                <!-- 6. LIMITATIONS AND UNVERIFIED INFORMATION -->
+                <div class="limitations-box">
+                    <h4>
+                        <span>⚠️</span> Limitations & Advisory Disclaimer
+                    </h4>
+                    <p id="limitationsText"></p>
+                </div>
+
+            </section>
+
+        </section>
+
+        <!-- BACK TO DASHBOARD NAVIGATION -->
+        <div class="back-nav">
+            <a href="{{ url_for('dashboard') }}">
+                ← Back to Safety Dashboard
+            </a>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <h2>SHAKTI AI</h2>
+        <p>Smart Help & Assistance for Keeping Women Independent.</p>
+        <p class="copyright">© 2026 SHAKTI AI. All Rights Reserved.</p>
+    </footer>
+
+    <!-- INTERFACE JAVASCRIPT -->
+    <script>
+        const textarea = document.getElementById("situationInput");
+        const charCount = document.getElementById("charCount");
+        const charCounter = document.getElementById("charCounter");
+        const analyzeBtn = document.getElementById("analyzeBtn");
+        const loadingBox = document.getElementById("loadingBox");
+        const errorAlert = document.getElementById("errorAlert");
+        const resultsSection = document.getElementById("resultsSection");
+        const highRiskAlert = document.getElementById("highRiskAlert");
+
+        // LIVE CHARACTER COUNTER
+        textarea.addEventListener("input", function() {
+            const currentLen = textarea.value.length;
+            charCount.textContent = currentLen;
+
+            if (currentLen >= 2000) {
+                charCounter.className = "char-counter limit-reached";
+            } else if (currentLen >= 1800) {
+                charCounter.className = "char-counter limit-near";
+            } else {
+                charCounter.className = "char-counter";
+            }
+        });
+
+        // APPLY QUICK SUGGESTION
+        function applySuggestion(text) {
+            textarea.value = text;
+            textarea.dispatchEvent(new Event("input"));
+            textarea.focus();
+        }
+
+        // CLEAR INPUT
+        function clearInput() {
+            textarea.value = "";
+            textarea.dispatchEvent(new Event("input"));
+            errorAlert.style.display = "none";
+            resultsSection.style.display = "none";
+            highRiskAlert.style.display = "none";
+            textarea.focus();
+        }
+
+        // POPULATE LIST HELPER
+        function populateList(elementId, items) {
+            const listEl = document.getElementById(elementId);
+            listEl.innerHTML = "";
+
+            if (!items || items.length === 0) {
+                const li = document.createElement("li");
+                li.textContent = "None specified.";
+                listEl.appendChild(li);
+                return;
+            }
+
+            items.forEach(function(item) {
+                const li = document.createElement("li");
+                li.textContent = item;
+                listEl.appendChild(li);
+            });
+        }
+
+        // ANALYZE SITUATION (Calls backend API)
+        async function analyzeSituation() {
+            const text = textarea.value.trim();
+
+            errorAlert.style.display = "none";
+            resultsSection.style.display = "none";
+            highRiskAlert.style.display = "none";
+
+            // Basic client-side validation
+            if (!text) {
+                showError("Please describe your situation before requesting an analysis.");
+                textarea.focus();
+                return;
+            }
+
+            if (text.length < 10) {
+                showError("Please provide a little more detail (at least 10 characters) so the assistant can give meaningful guidance.");
+                textarea.focus();
+                return;
+            }
+
+            if (text.length > 2000) {
+                showError("Your situation description exceeds the 2,000 character limit. Please shorten it slightly.");
+                return;
+            }
+
+            // UI state: loading
+            analyzeBtn.disabled = true;
+            loadingBox.style.display = "block";
+
+            try {
+                const response = await fetch("/api/safety_assistant/analyze", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        situation: text,
+                        situation_text: text
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    const message = data.error || data.message || "An error occurred while analyzing the situation. Please try again.";
+                    showError(message);
+                    return;
+                }
+
+                // Render structured results
+                renderResults(data.analysis);
+
+            } catch (err) {
+                console.error("Analysis network error:", err);
+                showError("Unable to reach the safety assistant server. If you are in immediate danger, please dial 112 directly.");
+            } finally {
+                analyzeBtn.disabled = false;
+                loadingBox.style.display = "none";
+            }
+        }
+
+        // DISPLAY ERROR
+        function showError(message) {
+            errorAlert.textContent = message;
+            errorAlert.style.display = "block";
+        }
+
+        // RENDER STRUCTURED RESULTS
+        function renderResults(analysis) {
+            if (!analysis) {
+                showError("Invalid analysis payload received.");
+                return;
+            }
+
+            // 1. Situation Summary
+            document.getElementById("situationSummary").textContent =
+                analysis.situation_summary || "No summary provided.";
+
+            // 2. Risk Level
+            const rawRisk = (analysis.risk_level || "Medium").trim();
+            const normalizedRisk = rawRisk.toLowerCase();
+            const riskBadge = document.getElementById("riskLevelBadge");
+            const riskCard = document.getElementById("riskCard");
+
+            riskBadge.textContent = rawRisk;
+            riskBadge.className = "risk-level-tag";
+            riskCard.className = "risk-card";
+
+            if (normalizedRisk === "low") {
+                riskBadge.classList.add("tag-low");
+                riskCard.classList.add("risk-low");
+                highRiskAlert.style.display = "none";
+            } else if (normalizedRisk === "medium" || normalizedRisk === "moderate") {
+                riskBadge.classList.add("tag-medium");
+                riskCard.classList.add("risk-medium");
+                highRiskAlert.style.display = "none";
+            } else if (normalizedRisk === "high") {
+                riskBadge.classList.add("tag-high");
+                riskCard.classList.add("risk-high");
+                highRiskAlert.style.display = "block";
+            } else if (normalizedRisk === "critical") {
+                riskBadge.classList.add("tag-critical");
+                riskCard.classList.add("risk-critical");
+                highRiskAlert.style.display = "block";
+            } else {
+                riskBadge.classList.add("tag-medium");
+                riskCard.classList.add("risk-medium");
+                highRiskAlert.style.display = "none";
+            }
+
+            // 3. Extracted Details
+            populateList("extractedDetailsList", analysis.important_details);
+
+            // 4. Recommended Actions
+            populateList("recommendedActionsList", analysis.recommended_actions);
+
+            // 5. Missing Information
+            populateList("missingInformationList", analysis.missing_information);
+
+            // 6. Limitations and Disclaimer
+            document.getElementById("limitationsText").textContent =
+                analysis.limitations_and_uncertainty ||
+                "This AI safety analysis is purely advisory and based solely on unverified user input. It cannot replace professional emergency services. In any immediate danger, contact emergency authorities (112) or trigger SOS without delay.";
+
+            // Reveal section and scroll smoothly into view
+            resultsSection.style.display = "block";
+            resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    </script>
+
+</body>
+
+</html>

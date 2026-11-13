@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Journey Guardian | SHAKTI AI</title>
 
-```
 <style>
     * {
         margin: 0;
@@ -137,13 +136,11 @@
         }
     }
 </style>
-```
 
 </head>
 
 <body>
 
-```
 <nav>
     <h2>SHAKTI AI</h2>
     <div>
@@ -162,6 +159,7 @@
     <div class="journey-card">
 
         <form id="journeyForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <label for="destination">Enter Your Destination</label>
             <input type="text" id="destination"
@@ -240,7 +238,6 @@
         });
     }
 </script>
-```
 
 </body>
 </html>

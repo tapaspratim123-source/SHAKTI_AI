@@ -7,11 +7,29 @@ from flask import (
 import sqlite3
 import os
 import re
+import json
+import traceback
+import secrets
+import time
+import threading
+from collections import deque
+from datetime import timedelta
 
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
+
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+from flask_wtf.csrf import CSRFProtect, CSRFError
+
+try:
+    from google import genai
+    from google.genai import types
+except ImportError:
+    genai = None
+    types = None
 
 
 # =====================================
@@ -20,7 +38,73 @@ from werkzeug.security import (
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("SECRET_KEY", "local-development-only")
+# Determine if running in a production environment (Render sets RENDER=true)
+is_production = (
+    os.environ.get("RENDER", "").lower() in ("true", "1") or
+    os.environ.get("FLASK_ENV", "").lower() == "production" or
+    os.environ.get("ENVIRONMENT", "").lower() == "production"
+)
+
+secret_key = os.environ.get("SECRET_KEY")
+if secret_key:
+    secret_key = secret_key.strip()
+
+if is_production and not secret_key:
+    raise RuntimeError(
+        "CRITICAL SECURITY CONFIGURATION ERROR: The SECRET_KEY environment variable is not set. "
+        "A secure secret key is required in production (Render) to encrypt and sign user sessions. "
+        "Please configure SECRET_KEY in your Render dashboard environment variables."
+    )
+
+if not secret_key:
+    secret_key = secrets.token_hex(32)
+    print("\n" + "=" * 70)
+    print("[SHAKTI AI SECURITY WARNING] SECRET_KEY is not set in environment.")
+    print("A temporary cryptographic key was generated for this local session.")
+    print("User sessions will reset whenever the Flask application restarts.")
+    print("To keep persistent sessions locally, set SECRET_KEY in your environment.")
+    print("=" * 70 + "\n")
+
+app.secret_key = secret_key
+
+# Enforce secure session cookie attributes and lifetime
+app.config.update(
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_PATH="/",
+    SESSION_COOKIE_DOMAIN=None,
+)
+
+if is_production:
+    app.config.update(
+        SESSION_COOKIE_NAME="__Host-shakti_session",
+        SESSION_COOKIE_SECURE=True,
+    )
+    # Configure ProxyFix for Render reverse proxy (trusts X-Forwarded-For, Proto, Host from 1 proxy hop)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+else:
+    app.config.update(
+        SESSION_COOKIE_NAME="shakti_session",
+        SESSION_COOKIE_SECURE=False,
+    )
+
+# =====================================
+# CSRF PROTECTION INITIALIZATION
+# =====================================
+
+csrf = CSRFProtect(app)
+
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    if request.is_json or request.path.startswith('/api/'):
+        return jsonify({
+            "success": False,
+            "error": f"CSRF validation failed: {e.description}"
+        }), 400
+
+    return f"Bad Request (400): CSRF validation failed - {e.description}", 400
 
 DATABASE = os.path.join(app.root_path, "shakti.db")
 
@@ -119,15 +203,27 @@ def register():
 
     if request.method == 'POST':
 
-        name = request.form['name'].strip()
+        name = request.form.get('name', '').strip()
 
-        email = request.form['email'].strip().lower()
+        email = request.form.get('email', '').strip().lower()
 
-        password = request.form['password']
+        password = request.form.get('password', '')
 
         if not name or not email or not password:
 
             flash("Please fill in all fields.")
+
+            return redirect(url_for('register'))
+
+        if len(name) > 100:
+
+            flash("Name must not exceed 100 characters.")
+
+            return redirect(url_for('register'))
+
+        if not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', email):
+
+            flash("Please enter a valid email address.")
 
             return redirect(url_for('register'))
 
@@ -171,6 +267,87 @@ def register():
 
 
 # =====================================
+# LOGIN RATE LIMITER (THREAD-SAFE & IN-MEMORY)
+# =====================================
+
+class LoginRateLimiter:
+    """
+    Thread-safe in-memory sliding window rate limiter for failed login attempts.
+    Tracks failed attempts by (client_ip, normalized_email) tuple.
+    Automatically expires old timestamps and prunes stale keys.
+    """
+    def __init__(self, max_attempts=5, window_seconds=300):
+        self.max_attempts = max_attempts
+        self.window_seconds = window_seconds
+        self._lock = threading.Lock()
+        self._failures = {}
+        self._last_cleanup = time.time()
+
+    def _get_key(self, ip, email):
+        clean_ip = (ip or '127.0.0.1').strip()
+        clean_email = (email or '').strip().lower()
+        return (clean_ip, clean_email)
+
+    def _cleanup_expired(self, now):
+        """Periodically cleans up empty or stale entries to prevent memory growth."""
+        if now - self._last_cleanup < 60:
+            return
+        self._last_cleanup = now
+        expired_keys = [
+            k for k, timestamps in self._failures.items()
+            if not timestamps or (now - timestamps[-1] > self.window_seconds)
+        ]
+        for k in expired_keys:
+            del self._failures[k]
+
+    def is_rate_limited(self, ip, email, now=None):
+        """
+        Checks if the given (ip, email) has reached or exceeded max_attempts within window_seconds.
+        Returns (is_limited: bool, seconds_remaining: int).
+        """
+        if now is None:
+            now = time.time()
+
+        key = self._get_key(ip, email)
+        with self._lock:
+            self._cleanup_expired(now)
+            timestamps = self._failures.get(key)
+            if not timestamps:
+                return False, 0
+
+            # Prune timestamps outside sliding window
+            while timestamps and (now - timestamps[0] > self.window_seconds):
+                timestamps.popleft()
+
+            if len(timestamps) >= self.max_attempts:
+                seconds_remaining = max(1, int(self.window_seconds - (now - timestamps[0])))
+                return True, seconds_remaining
+
+            return False, 0
+
+    def record_failure(self, ip, email, now=None):
+        """Records a failed login attempt for the given (ip, email)."""
+        if now is None:
+            now = time.time()
+
+        key = self._get_key(ip, email)
+        with self._lock:
+            self._cleanup_expired(now)
+            if key not in self._failures:
+                self._failures[key] = deque()
+            self._failures[key].append(now)
+
+    def clear(self, ip, email):
+        """Clears failed attempts upon successful authentication."""
+        key = self._get_key(ip, email)
+        with self._lock:
+            self._failures.pop(key, None)
+
+
+login_limiter = LoginRateLimiter(max_attempts=5, window_seconds=300)
+
+
+# =====================================
 # USER LOGIN
 # =====================================
 
@@ -179,9 +356,23 @@ def login():
 
     if request.method == 'POST':
 
-        email = request.form['email'].strip().lower()
+        client_ip = request.remote_addr or '127.0.0.1'
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
 
-        password = request.form['password']
+        # Check rate limit before performing authentication or db queries
+        is_limited, seconds_remaining = login_limiter.is_rate_limited(client_ip, email)
+        if is_limited:
+            minutes_remaining = max(1, (seconds_remaining + 59) // 60)
+            if minutes_remaining == 1:
+                flash("Too many failed login attempts. Please wait 1 minute before trying again.")
+            else:
+                flash(f"Too many failed login attempts. Please wait {minutes_remaining} minutes before trying again.")
+            return redirect(url_for('login'))
+
+        if not email or not password:
+            flash("Please enter both email and password.")
+            return redirect(url_for('login'))
 
         conn = get_db_connection()
 
@@ -194,7 +385,11 @@ def login():
 
         if user and check_password_hash(user['password'], password):
 
+            login_limiter.clear(client_ip, email)
+
             session.clear()
+
+            session.permanent = True
 
             session['user_id'] = user['id']
 
@@ -204,7 +399,11 @@ def login():
 
         else:
 
+            login_limiter.record_failure(client_ip, email)
+
             flash("Invalid email or password.")
+
+            return redirect(url_for('login'))
 
     return render_template('login.html')
 
@@ -248,6 +447,19 @@ def journey_guardian():
         return redirect(url_for('login'))
 
     return render_template('journey_guardian.html')
+
+
+# =====================================
+# AI SAFETY ASSISTANT PAGE
+# =====================================
+
+@app.route('/ai_safety_assistant')
+def ai_safety_assistant():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    return render_template('ai_safety_assistant.html')
 
 
 # =====================================
@@ -637,19 +849,32 @@ def delete_contact(contact_id):
 
 def send_demo_sms(contact, message):
 
+    try:
+        raw_phone = str(contact['phone']).strip() if contact and 'phone' in contact.keys() else ''
+    except Exception:
+        raw_phone = ''
+
+    try:
+        relationship = str(contact['relationship']).strip() if contact and 'relationship' in contact.keys() else 'Trusted Contact'
+    except Exception:
+        relationship = 'Trusted Contact'
+
+    if len(raw_phone) >= 4:
+        masked_phone = '*' * (len(raw_phone) - 4) + raw_phone[-4:]
+    else:
+        masked_phone = '[PROTECTED]'
+
     print("\n" + "=" * 50)
 
     print("SHAKTI AI - DEMO SMS NOTIFICATION")
 
     print("=" * 50)
 
-    print("Recipient Name:", contact['name'])
+    print("Recipient Type:", relationship)
 
-    print("Recipient Phone:", contact['phone'])
+    print("Recipient Phone:", masked_phone)
 
-    print("Emergency Message:")
-
-    print(message)
+    print("Emergency Message: [SIMULATED ALERT - LOCATION & USER DATA REDACTED]")
 
     print("-" * 50)
 
@@ -660,6 +885,311 @@ def send_demo_sms(contact, message):
     print("=" * 50 + "\n")
 
     return True
+
+
+# =====================================
+# GEMINI AI SAFETY ASSISTANT HELPER
+# =====================================
+
+def analyze_safety_situation(situation_text):
+    """
+    Analyzes a user-described safety situation using the Google GenAI SDK.
+    Returns a structured assessment dictionary suitable for a women's safety assistant.
+    Does NOT store any user situation or AI response in the database.
+    Ensures the client is closed after use and sanitizes all user-facing errors.
+    """
+    # 1. Validate user input and enforce length boundaries
+    if not situation_text or not isinstance(situation_text, str) or not situation_text.strip():
+        return {
+            "success": False,
+            "error": "Please describe your safety situation."
+        }
+
+    cleaned_text = situation_text.strip()
+    if len(cleaned_text) < 10:
+        return {
+            "success": False,
+            "error": "Please provide more details (at least 10 characters) so the assistant can assess the situation."
+        }
+
+    if len(cleaned_text) > 2000:
+        return {
+            "success": False,
+            "error": "Situation description is too long (maximum 2,000 characters). Please provide a more concise description."
+        }
+
+    # 2. Check SDK availability
+    if genai is None:
+        return {
+            "success": False,
+            "error": "The google-genai library is not available. Please ensure google-genai is installed."
+        }
+
+    # 3. Retrieve API key securely from environment
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return {
+            "success": False,
+            "error": "Gemini API key is not configured. Please ensure GEMINI_API_KEY is set in your environment."
+        }
+
+    api_key = api_key.strip().strip('"').strip("'")
+
+    # 4. Construct prompt and safety instructions
+    system_instruction = """You are the AI Safety Assistant for SHAKTI AI, a women's safety platform. Your mission is to evaluate a user's safety situation and provide protective, actionable, and calm guidance.
+
+MANDATORY SAFETY DIRECTIVE:
+- Your response is purely advisory and based solely on unverified user input.
+- It is NOT verified fact and must NEVER delay contacting emergency services when someone is in immediate danger.
+- If there is imminent threat or danger, explicitly instruct the user to trigger emergency SOS or contact emergency authorities (such as Police 112) immediately.
+
+Analyze the provided situation and return ONLY a valid JSON object with the following exact keys:
+{
+  "situation_summary": "Concise, objective summary of the reported situation.",
+  "risk_level": "One of: Low, Medium, High, Critical",
+  "important_details": ["Key detail or environmental risk factor 1", "Key detail 2"],
+  "recommended_actions": ["Immediate prioritized action 1", "Action 2"],
+  "missing_information": ["Critical unknown detail 1 that could clarify the risk", "Detail 2"],
+  "limitations_and_uncertainty": "Advisory disclaimer emphasizing that this AI guidance is not a substitute for emergency services and cannot verify real-world conditions."
+}"""
+
+    user_prompt = f"""{system_instruction}
+
+USER SAFETY SITUATION:
+{cleaned_text}
+
+Provide your structured JSON analysis now:"""
+
+    model_name = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
+    client = None
+
+    try:
+        client = genai.Client(
+            api_key=api_key,
+            http_options={"timeout": 30000.0}
+        )
+
+        config = types.GenerateContentConfig(
+            response_mime_type="application/json",
+            temperature=0.2,
+        ) if types else {"response_mime_type": "application/json"}
+
+        response = client.models.generate_content(
+            model=model_name,
+            contents=user_prompt,
+            config=config
+        )
+
+        response_text = (response.text or "").strip()
+
+        # Clean potential markdown wrapping if present
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        elif response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+
+        try:
+            parsed_data = json.loads(response_text)
+        except json.JSONDecodeError as decode_err:
+            print("\n[SHAKTI AI ASSISTANT WARNING] JSON decode failed:", type(decode_err).__name__)
+            return {
+                "success": False,
+                "error": "The AI response could not be verified in the required structured safety format. Please try again."
+            }
+
+        if not isinstance(parsed_data, dict):
+            print("\n[SHAKTI AI ASSISTANT WARNING] Model returned non-dictionary JSON root.")
+            return {
+                "success": False,
+                "error": "Invalid response structure received from the safety assessment model."
+            }
+
+        # 5. Strict validation of required fields
+        summary = str(parsed_data.get("situation_summary", "")).strip()
+        if not summary:
+            print("\n[SHAKTI AI ASSISTANT WARNING] Validation failure: missing or empty situation_summary.")
+            return {
+                "success": False,
+                "error": "The AI analysis is incomplete (missing situation summary). Please try again."
+            }
+
+        raw_risk = str(parsed_data.get("risk_level", "")).strip().capitalize()
+        # Normalize "Moderate" to "Medium" only if it is an exact risk-level value
+        if raw_risk == "Moderate":
+            raw_risk = "Medium"
+
+        if raw_risk not in ["Low", "Medium", "High", "Critical"]:
+            print(f"\n[SHAKTI AI ASSISTANT WARNING] Validation failure: unrecognized risk_level '{raw_risk}'.")
+            return {
+                "success": False,
+                "error": "The AI analysis returned an unrecognized risk level. Please try again."
+            }
+
+        def to_clean_list(val):
+            if isinstance(val, list):
+                return [str(item).strip() for item in val if str(item).strip()]
+            elif isinstance(val, str) and val.strip():
+                return [val.strip()]
+            return []
+
+        actions = to_clean_list(parsed_data.get("recommended_actions"))
+        if not actions:
+            print("\n[SHAKTI AI ASSISTANT WARNING] Validation failure: empty recommended_actions list.")
+            return {
+                "success": False,
+                "error": "The AI analysis is incomplete (no recommended safety actions provided). Please try again."
+            }
+
+        details = to_clean_list(parsed_data.get("important_details"))
+        missing_info = to_clean_list(parsed_data.get("missing_information"))
+        limitations = str(parsed_data.get("limitations_and_uncertainty", "")).strip()
+        if not limitations:
+            limitations = (
+                "This AI safety analysis is purely advisory and based solely on unverified user input. "
+                "It cannot replace professional emergency services. In any immediate danger, contact emergency authorities (112) or trigger SOS without delay."
+            )
+
+        structured_analysis = {
+            "situation_summary": summary,
+            "risk_level": raw_risk,
+            "important_details": details,
+            "recommended_actions": actions,
+            "missing_information": missing_info,
+            "limitations_and_uncertainty": limitations
+        }
+
+        return {
+            "success": True,
+            "analysis": structured_analysis
+        }
+
+    except Exception as error:
+        error_str = str(error)
+        tb_str = traceback.format_exc()
+
+        # Redact the Gemini API key from error message and traceback
+        if api_key:
+            error_str = error_str.replace(api_key, "[REDACTED_API_KEY]")
+            tb_str = tb_str.replace(api_key, "[REDACTED_API_KEY]")
+
+        # Safe server-side terminal logging (never logs user situation text or credentials)
+        print("\n" + "=" * 60)
+        print("SHAKTI AI - GEMINI SAFETY ASSISTANT ERROR LOG")
+        print("=" * 60)
+        print("Error Type:", type(error).__name__)
+        print("Error Message:", error_str)
+        print("-" * 60)
+        print(tb_str)
+        print("=" * 60 + "\n")
+
+        # Sanitize error output to prevent exposing technical details, URLs, or keys to user
+        error_lower = error_str.lower()
+        if any(kw in error_lower for kw in ["api_key", "unauthenticated", "permission", "403", "401"]):
+            user_error = "AI service authentication error. Please verify the Gemini API key configuration."
+        elif any(kw in error_lower for kw in ["quota", "rate limit", "429", "resource_exhausted"]):
+            user_error = "The AI safety service is temporarily experiencing high traffic. Please wait a moment and try again."
+        elif any(kw in error_lower for kw in ["not found", "404"]):
+            user_error = f"The requested Gemini model ({model_name}) is currently unavailable. Please check the model configuration."
+        elif any(kw in error_lower for kw in ["timeout", "deadline", "connection"]):
+            user_error = "Network timeout while contacting the AI safety service. Please check your internet connection and try again."
+        else:
+            user_error = (
+                "Unable to complete AI safety analysis at this moment. "
+                "If you are in immediate danger, please activate the SOS Emergency button or call emergency services (112) immediately."
+            )
+
+        return {
+            "success": False,
+            "error": user_error
+        }
+
+    finally:
+        # Ensure client is properly closed after use
+        if client is not None and hasattr(client, "close") and callable(client.close):
+            try:
+                client.close()
+            except Exception:
+                pass
+
+
+# =====================================
+# AI SAFETY ASSISTANT - SITUATION ANALYSIS
+# =====================================
+
+@app.route('/api/safety_assistant/analyze', methods=['POST'])
+def analyze_safety():
+
+    # 1. Require authentication
+    if 'user_id' not in session:
+        return jsonify({
+            "success": False,
+            "error": "Please login to access the AI Safety Assistant.",
+            "login_required": True
+        }), 401
+
+    # 2. Accept JSON input
+    data = request.get_json(silent=True) or {}
+
+    # 3. Read user situation with fallback
+    situation = data.get('situation')
+    if situation is None or not isinstance(situation, str) or not situation.strip():
+        situation = data.get('situation_text')
+
+    # 4. Validate input
+    if not situation or not isinstance(situation, str) or not situation.strip():
+        return jsonify({
+            "success": False,
+            "error": "Please describe your safety situation."
+        }), 400
+
+    cleaned_situation = situation.strip()
+
+    if len(cleaned_situation) < 10:
+        return jsonify({
+            "success": False,
+            "error": "Please provide more details (at least 10 characters) so the assistant can assess the situation."
+        }), 400
+
+    if len(cleaned_situation) > 2000:
+        return jsonify({
+            "success": False,
+            "error": "Situation description is too long (maximum 2,000 characters). Please provide a more concise description."
+        }), 400
+
+    # 5. Call analyze_safety_situation helper safely
+    try:
+        result = analyze_safety_situation(cleaned_situation)
+
+        if not result.get("success"):
+            print(f"[SHAKTI AI API 500] Safety analysis returned error: {result.get('error')}")
+            return jsonify(result), 500
+
+        return jsonify(result), 200
+
+    except Exception as route_err:
+        route_err_str = str(route_err)
+        route_tb_str = traceback.format_exc()
+        api_k = os.environ.get("GEMINI_API_KEY")
+        if api_k:
+            route_err_str = route_err_str.replace(api_k, "[REDACTED_API_KEY]")
+            route_tb_str = route_tb_str.replace(api_k, "[REDACTED_API_KEY]")
+
+        print("\n" + "=" * 60)
+        print("SHAKTI AI - API ROUTE UNEXPECTED EXCEPTION")
+        print("=" * 60)
+        print("Error Type:", type(route_err).__name__)
+        print("Error Message:", route_err_str)
+        print("-" * 60)
+        print(route_tb_str)
+        print("=" * 60 + "\n")
+
+        return jsonify({
+            "success": False,
+            "error": "Unable to complete AI safety analysis at this moment. If you are in immediate danger, please dial 112 immediately."
+        }), 500
 
 
 # =====================================
@@ -759,15 +1289,13 @@ def prepare_sos():
 
     notification_results = []
 
-    print("\n")
-
-    print("#" * 60)
+    print("\n" + "#" * 60)
 
     print("SHAKTI AI EMERGENCY SYSTEM ACTIVATED")
 
-    print("User:", session['user_name'])
+    print("GPS Status: Coordinates received and validated (coordinates redacted)")
 
-    print("GPS Location:", latitude, longitude)
+    print(f"Target Recipients: {len(contacts)} trusted contact(s)")
 
     print("#" * 60)
 
@@ -799,7 +1327,7 @@ def prepare_sos():
 
             failed_count += 1
 
-            print("Demo notification error:", error)
+            print("Demo notification error:", type(error).__name__)
 
             notification_results.append({
                 "name": contact['name'],
@@ -1014,4 +1542,4 @@ def logout():
 create_table()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=not is_production)

@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>VoiceGuard | SHAKTI AI</title>
 
     <link rel="stylesheet"
@@ -152,6 +154,114 @@
             color: #d83f89;
         }
 
+        .emergency-top-notice {
+            background: #fff0f0;
+            color: #bd1727;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border: 1px solid #ffd6d6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .emergency-top-notice a {
+            color: #bd1727;
+            text-decoration: underline;
+        }
+
+        .sos-result-box {
+            margin-top: 25px;
+            padding: 22px;
+            border-radius: 14px;
+            text-align: left;
+            display: none;
+            background: #fff8f8;
+            border: 2px solid #e32636;
+        }
+
+        .sos-result-box.success {
+            background: #faf5ff;
+            border-color: #6a1b9a;
+        }
+
+        .sos-result-box.error {
+            background: #fff5f5;
+            border-color: #e32636;
+        }
+
+        .sos-emergency-banner {
+            background: linear-gradient(135deg, #bd1727, #e32636);
+            color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sos-emergency-banner .banner-text {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .sos-emergency-banner .hotline-pill {
+            background: #ffffff;
+            color: #bd1727;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .sos-disclaimer {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 14px 0;
+            border-left: 4px solid #ffeeba;
+        }
+
+        .sos-contacts-list {
+            margin: 12px 0;
+            padding-left: 20px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .sos-contacts-list li {
+            margin-bottom: 6px;
+        }
+
+        .map-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 18px;
+            background: #54258a;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .map-btn:hover {
+            background: #a33bb9;
+            color: white;
+        }
+
         @media (max-width: 600px) {
             .voice-container {
                 margin: 25px 15px;
@@ -165,6 +275,11 @@
 <body>
 
     <div class="voice-container">
+
+        <!-- EMERGENCY NUMBER 112 BANNER -->
+        <div class="emergency-top-notice">
+            🚨 Immediate Emergency Helpline: <strong><a href="tel:112">Dial 112</a></strong> (Police & Emergency Services)
+        </div>
 
         <div class="voice-icon">🎤</div>
 
@@ -226,17 +341,21 @@
                 Do you want to proceed to the SOS feature?
             </p>
 
-            <button class="confirm-btn"
+            <button class="confirm-btn" id="confirmSosButton"
                     onclick="confirmEmergency()">
                 Confirm SOS
             </button>
 
-            <button class="cancel-btn"
+            <button class="cancel-btn" id="cancelSosButton"
                     onclick="cancelEmergency()">
                 Cancel
             </button>
 
         </div>
+
+
+        <!-- SOS RESULT CARD -->
+        <div class="sos-result-box" id="sosResultBox"></div>
 
 
         <!-- INFORMATION -->
@@ -495,17 +614,183 @@
         }
 
 
-        // CONFIRM EMERGENCY
+        let isProcessingSOS = false;
+
+        const confirmSosButton = document.getElementById("confirmSosButton");
+        const cancelSosButton = document.getElementById("cancelSosButton");
+        const sosResultBox = document.getElementById("sosResultBox");
+
+        function escapeHTML(str) {
+            if (!str) return "";
+            return String(str).replace(/[&<>"']/g, function(char) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                }[char];
+            });
+        }
+
+
+        // CONFIRM EMERGENCY - INITIATE SOS WORKFLOW
 
         function confirmEmergency() {
 
-            emergencyWarning.style.display = "none";
+            if (isProcessingSOS) {
+                return;
+            }
 
-            voiceStatus.innerText =
-                "SOS confirmation received. Emergency integration is not connected yet.";
+            isProcessingSOS = true;
 
-            speakMessage(
-                "SOS confirmation received. The emergency system is not connected yet."
+            if (confirmSosButton) {
+                confirmSosButton.disabled = true;
+                confirmSosButton.innerText = "⏳ Detecting Location...";
+            }
+            if (cancelSosButton) {
+                cancelSosButton.disabled = true;
+            }
+
+            if (sosResultBox) {
+                sosResultBox.style.display = "none";
+                sosResultBox.innerHTML = "";
+            }
+
+            voiceStatus.innerText = "Confirming emergency... Requesting GPS location.";
+            speakMessage("Emergency confirmed. Detecting your location.");
+
+            if (!navigator.geolocation) {
+                isProcessingSOS = false;
+                if (confirmSosButton) {
+                    confirmSosButton.disabled = false;
+                    confirmSosButton.innerText = "Confirm SOS";
+                }
+                if (cancelSosButton) {
+                    cancelSosButton.disabled = false;
+                }
+                renderSosError("Geolocation is not supported by your browser.");
+                voiceStatus.innerText = "Geolocation not supported.";
+                speakMessage("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async function(position) {
+
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    voiceStatus.innerText = "Location detected. Processing demo emergency notifications...";
+                    if (confirmSosButton) {
+                        confirmSosButton.innerText = "⏳ Processing Demo SOS...";
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || "{{ csrf_token() }}";
+
+                    try {
+
+                        const response = await fetch("/api/sos/prepare", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": csrfToken
+                            },
+                            body: JSON.stringify({
+                                latitude: latitude,
+                                longitude: longitude,
+                                accuracy: accuracy
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        isProcessingSOS = false;
+                        emergencyWarning.style.display = "none";
+                        if (confirmSosButton) {
+                            confirmSosButton.disabled = false;
+                            confirmSosButton.innerText = "Confirm SOS";
+                        }
+                        if (cancelSosButton) {
+                            cancelSosButton.disabled = false;
+                        }
+
+                        if (response.ok && data.success) {
+
+                            renderSosSuccess(data, position.coords);
+                            voiceStatus.innerText = "Demo SOS completed: " + data.successful_count + " of " + data.contact_count + " simulated notifications processed.";
+                            speakMessage("Demo emergency alert completed. Remember this is a simulation and no actual SMS was sent.");
+
+                        } else if (response.status === 404 || (data.message && data.message.includes("No trusted contacts"))) {
+
+                            renderSosMissingContacts(data.message);
+                            voiceStatus.innerText = "No trusted contacts found.";
+                            speakMessage("No trusted contacts found in SafeCircle.");
+
+                        } else if (data.login_required) {
+
+                            renderSosError("Your session has expired. Please log in again to access emergency contacts.");
+                            voiceStatus.innerText = "Authentication required.";
+
+                        } else {
+
+                            renderSosError(data.error || data.message || "Failed to process emergency alert.");
+                            voiceStatus.innerText = "SOS processing failed.";
+                            speakMessage("SOS processing failed.");
+
+                        }
+
+                    } catch (netError) {
+
+                        isProcessingSOS = false;
+                        if (confirmSosButton) {
+                            confirmSosButton.disabled = false;
+                            confirmSosButton.innerText = "Confirm SOS";
+                        }
+                        if (cancelSosButton) {
+                            cancelSosButton.disabled = false;
+                        }
+
+                        renderSosError("Network error: Unable to reach the safety server. Please check your internet connection.");
+                        voiceStatus.innerText = "Network error connecting to safety server.";
+                        speakMessage("Network error connecting to safety server.");
+
+                    }
+
+                },
+
+                function(geoError) {
+
+                    isProcessingSOS = false;
+                    if (confirmSosButton) {
+                        confirmSosButton.disabled = false;
+                        confirmSosButton.innerText = "Confirm SOS";
+                    }
+                    if (cancelSosButton) {
+                        cancelSosButton.disabled = false;
+                    }
+
+                    let message = "Unable to detect your location.";
+                    if (geoError.code === 1) {
+                        message = "Location access was denied. Please allow location permissions in your browser to activate SOS.";
+                    } else if (geoError.code === 2) {
+                        message = "GPS location is currently unavailable. Please verify location services are enabled on your device.";
+                    } else if (geoError.code === 3) {
+                        message = "Location detection timed out. Please try again.";
+                    }
+
+                    renderSosError(message);
+                    voiceStatus.innerText = "Location error: " + message;
+                    speakMessage("Location detection failed. Please check permissions.");
+
+                },
+
+                {
+                    enableHighAccuracy: true,
+                    timeout: 20000,
+                    maximumAge: 0
+                }
             );
 
         }
@@ -515,16 +800,113 @@
 
         function cancelEmergency() {
 
+            if (isProcessingSOS) {
+                return;
+            }
+
             emergencyWarning.style.display = "none";
-
             emergencyDetected = false;
+            voiceStatus.innerText = "Emergency prompt cancelled.";
+            speakMessage("Emergency prompt cancelled.");
 
-            voiceStatus.innerText =
-                "Emergency prompt cancelled.";
+        }
 
-            speakMessage(
-                "Emergency prompt cancelled."
-            );
+
+        // RENDER SUCCESSFUL SOS RESULT
+
+        function renderSosSuccess(data, coords) {
+
+            if (!sosResultBox) return;
+
+            let contactsHtml = "";
+            if (data.notification_results && data.notification_results.length > 0) {
+                contactsHtml = "<ul class=\"sos-contacts-list\">";
+                data.notification_results.forEach(function(c) {
+                    contactsHtml += "<li><strong>" + escapeHTML(c.name) + "</strong>: <span style=\"color:#2e7d32; font-weight:600;\">" + escapeHTML(c.status) + "</span></li>";
+                });
+                contactsHtml += "</ul>";
+            }
+
+            sosResultBox.className = "sos-result-box success";
+            sosResultBox.style.display = "block";
+            sosResultBox.innerHTML = `
+                <div class="sos-emergency-banner">
+                    <span class="banner-text">🚨 IMMEDIATE DANGER? CALL 112 DIRECTLY</span>
+                    <a href="tel:112" class="hotline-pill">📞 Dial 112</a>
+                </div>
+
+                <h3 style="color: #54258a; margin-bottom: 8px;">✅ Demo SOS Notifications Processed</h3>
+                <p style="font-size: 14px; color: #444; margin-bottom: 10px;">
+                    <strong>SafeCircle Contacts:</strong> ${escapeHTML(String(data.contact_count))} &nbsp;|&nbsp;
+                    <strong>Simulated Success:</strong> <span style="color: #2e7d32; font-weight: bold;">${escapeHTML(String(data.successful_count))}</span> &nbsp;|&nbsp;
+                    <strong>Failed:</strong> ${escapeHTML(String(data.failed_count))}
+                </p>
+
+                ${contactsHtml}
+
+                <div class="sos-disclaimer">
+                    <strong>⚠️ SIMULATION NOTICE:</strong><br>
+                    This is a <strong>demo simulation</strong>. Emergency notifications were prepared for your SafeCircle contacts, but <strong>no real cellular SMS messages were dispatched</strong>.<br>
+                    <strong>Police and emergency services have NOT been contacted.</strong> In an actual emergency, always call <strong>112</strong> immediately.
+                </div>
+
+                <p style="font-size: 13px; color: #555; margin-top: 10px;">
+                    <strong>Detected Coordinates:</strong> ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)} (Accuracy: ~${Math.round(coords.accuracy)}m)
+                </p>
+
+                <a href="${escapeHTML(data.map_url)}" target="_blank" rel="noopener noreferrer" class="map-btn">
+                    🗺️ View Detected Location on Google Maps
+                </a>
+            `;
+
+        }
+
+
+        // RENDER ERROR RESULT
+
+        function renderSosError(errMsg) {
+
+            if (!sosResultBox) return;
+
+            sosResultBox.className = "sos-result-box error";
+            sosResultBox.style.display = "block";
+            sosResultBox.innerHTML = `
+                <div class="sos-emergency-banner">
+                    <span class="banner-text">🚨 IMMEDIATE DANGER? CALL 112 DIRECTLY</span>
+                    <a href="tel:112" class="hotline-pill">📞 Dial 112</a>
+                </div>
+                <h3 style="color: #bd1727; margin-bottom: 8px;">❌ SOS Processing Error</h3>
+                <p style="font-size: 14px; color: #333;">${escapeHTML(errMsg)}</p>
+                <div class="sos-disclaimer">
+                    If you are in actual danger, do not wait for browser troubleshooting — dial emergency services (<strong>112</strong>) immediately.
+                </div>
+            `;
+
+        }
+
+
+        // RENDER MISSING CONTACTS RESULT
+
+        function renderSosMissingContacts(msg) {
+
+            if (!sosResultBox) return;
+
+            sosResultBox.className = "sos-result-box error";
+            sosResultBox.style.display = "block";
+            sosResultBox.innerHTML = `
+                <div class="sos-emergency-banner">
+                    <span class="banner-text">🚨 IMMEDIATE DANGER? CALL 112 DIRECTLY</span>
+                    <a href="tel:112" class="hotline-pill">📞 Dial 112</a>
+                </div>
+                <h3 style="color: #bd1727; margin-bottom: 8px;">⚠️ SafeCircle Contacts Required</h3>
+                <p style="font-size: 14px; color: #333;">${escapeHTML(msg)}</p>
+                <p style="margin-top: 12px;">
+                    <a href="/safecircle" class="map-btn">➕ Add Trusted Contacts in SafeCircle</a>
+                </p>
+                <div class="sos-disclaimer">
+                    <strong>Note:</strong> Emergency SOS requires at least one registered contact in SafeCircle. For immediate assistance, always dial <strong>112</strong>.
+                </div>
+            `;
 
         }
 
@@ -532,4 +914,3 @@
 
 </body>
 </html>
-
