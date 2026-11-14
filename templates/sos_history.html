@@ -304,7 +304,7 @@
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
-                <div class="flash-message">
+                <div class="flash-message" role="alert" aria-live="assertive">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -356,7 +356,7 @@
                   onsubmit="return confirm('Are you sure you want to delete ALL your SOS history records? This action cannot be undone.');">
 
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="clear-btn">
+                <button type="submit" class="clear-btn" aria-label="Clear all SOS history records">
                     🗑️ Clear All History
                 </button>
 
@@ -393,7 +393,8 @@
                         <a class="map-link"
                            href="https://www.google.com/maps?q={{ item['latitude'] }},{{ item['longitude'] }}"
                            target="_blank"
-                           rel="noopener noreferrer">
+                           rel="noopener noreferrer"
+                           aria-label="View Google Map for SOS alert from {{ item['created_at'] }}">
                             View Map
                         </a>
                     </td>
@@ -421,7 +422,7 @@
                               onsubmit="return confirm('Are you sure you want to delete this SOS record?');">
 
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="delete-btn">
+                            <button type="submit" class="delete-btn" aria-label="Delete SOS record from {{ item['created_at'] }}">
                                 Delete
                             </button>
 

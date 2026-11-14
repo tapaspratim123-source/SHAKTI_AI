@@ -66,7 +66,7 @@ class TestAISafetyAssistant(BaseTestCase):
         self.assertIn("maximum 2,000 characters", res_long.get_json().get("error", "").lower())
 
     def test_ai_safety_unconfigured_api_key_handled_gracefully(self):
-        """When GEMINI_API_KEY is not configured in the test environment, API must return a safe handled error."""
+        """When GEMINI_API_KEY is not configured in the test environment, API must return a safe fallback."""
         self.create_and_login_user(name="AI User 4", email="ai_val4@example.com", password="Password123!")
 
         page = self.client.get("/ai_safety_assistant")
@@ -77,8 +77,48 @@ class TestAISafetyAssistant(BaseTestCase):
             "situation": valid_situation
         }, headers={"X-CSRFToken": token})
 
-        # Expect structured error handling (not an unhandled 500 HTML trace)
+        # Expect structured safe fallback response (HTTP 200, is_fallback=True)
+        self.assertEqual(res.status_code, 200)
         data = res.get_json()
         self.assertIsNotNone(data, "API must return valid JSON response even when unconfigured")
-        self.assertFalse(data.get("success"))
-        self.assertIn("Gemini API key is not configured", data.get("error", ""))
+        self.assertTrue(data.get("success"))
+        self.assertTrue(data.get("is_fallback"))
+
+        analysis = data.get("analysis", {})
+        self.assertIn("situation_summary", analysis)
+        self.assertIn("recommended_actions", analysis)
+        self.assertIn("limitations_and_uncertainty", analysis)
+
+    def test_ai_safety_fallback_guidance_content(self):
+        """Fallback response must encourage moving to safety, contacting trusted people, and display helplines."""
+        self.create_and_login_user(name="AI User 5", email="ai_val5@example.com", password="Password123!")
+
+        page = self.client.get("/ai_safety_assistant")
+        token = self.get_csrf_token(page)
+
+        res = self.client.post("/api/safety_assistant/analyze", json={
+            "situation": "Walking alone at night and feeling uncomfortable."
+        }, headers={"X-CSRFToken": token})
+
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        analysis = data.get("analysis", {})
+        actions = " ".join(analysis.get("recommended_actions", []))
+        limitations = analysis.get("limitations_and_uncertainty", "")
+
+        # 1. Moving to safer public place
+        self.assertTrue(any(term in actions.lower() for term in ["safer", "public", "well-lit", "secure"]))
+
+        # 2. Contacting trusted people
+        self.assertTrue(any(term in actions.lower() for term in ["trusted contact", "trusted", "family", "friend"]))
+
+        # 3. Emergency helplines (112, 1091, 181)
+        self.assertIn("112", actions)
+        self.assertTrue("1091" in actions or "181" in actions)
+
+        # 4. Avoid claiming SHAKTI AI contacts police or sends real SMS
+        self.assertIn("does not automatically contact police", limitations.lower())
+        self.assertIn("real sms", limitations.lower())
+
+        # 5. Clearly state general guidance, not a substitute for emergency services
+        self.assertIn("not a substitute for professional", limitations.lower())

@@ -106,6 +106,18 @@ def handle_csrf_error(e):
 
     return f"Bad Request (400): CSRF validation failed - {e.description}", 400
 
+
+# =====================================
+# HTTP SECURITY HEADERS
+# =====================================
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
+
 DATABASE = os.path.join(app.root_path, "shakti.db")
 
 
@@ -177,6 +189,18 @@ def create_table():
             REFERENCES users(id)
             ON DELETE CASCADE
         )
+    """)
+
+    # DATABASE INDEXES
+
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_contacts_user_id
+        ON contacts(user_id)
+    """)
+
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_sos_history_user_id
+        ON sos_history(user_id)
     """)
 
     conn.commit()
@@ -891,6 +915,41 @@ def send_demo_sms(contact, message):
 # GEMINI AI SAFETY ASSISTANT HELPER
 # =====================================
 
+def get_safety_assistant_fallback(cleaned_text):
+    """
+    Returns a predefined structured fallback safety assessment when the live Gemini API
+    is unconfigured or temporarily unavailable.
+    """
+    summary = cleaned_text[:180] + ("..." if len(cleaned_text) > 180 else "")
+    return {
+        "success": True,
+        "is_fallback": True,
+        "analysis": {
+            "situation_summary": f"Reported situation: {summary}",
+            "risk_level": "Medium",
+            "important_details": [
+                "Automated live AI evaluation is currently offline; displaying standard safety protocol.",
+                "Assessment is based on general personal safety principles and unverified user description."
+            ],
+            "recommended_actions": [
+                "Move toward a well-lit, populated, or secure public location (such as a metro station, open store, or security desk) if you feel unsafe.",
+                "Call or message a trusted contact (family member, friend, or guardian) to share your current location and stay on the line.",
+                "In any active or escalating danger, immediately dial 112 (National Emergency Response) or 1091 / 181 (Women Helpline).",
+                "Keep your phone accessible, stay alert to your surroundings, and avoid isolated or poorly lit shortcuts."
+            ],
+            "missing_information": [
+                "Current physical surroundings, immediate proximity of other people, and whether anyone is following or confronting you."
+            ],
+            "limitations_and_uncertainty": (
+                "General Safety Guidance Notice: This is predefined precautionary guidance provided while live AI analysis is offline. "
+                "SHAKTI AI does not automatically contact police, dispatch emergency services, or send real SMS messages. "
+                "This guidance is not a substitute for professional law enforcement or emergency responders. "
+                "If you are in immediate danger, dial 112 directly without delay."
+            )
+        }
+    }
+
+
 def analyze_safety_situation(situation_text):
     """
     Analyzes a user-described safety situation using the Google GenAI SDK.
@@ -918,20 +977,16 @@ def analyze_safety_situation(situation_text):
             "error": "Situation description is too long (maximum 2,000 characters). Please provide a more concise description."
         }
 
-    # 2. Check SDK availability
+    # 2. Check SDK availability (fallback if library not installed)
     if genai is None:
-        return {
-            "success": False,
-            "error": "The google-genai library is not available. Please ensure google-genai is installed."
-        }
+        print("[SHAKTI AI ASSISTANT] google-genai library unavailable. Providing predefined safety guidance.")
+        return get_safety_assistant_fallback(cleaned_text)
 
-    # 3. Retrieve API key securely from environment
+    # 3. Retrieve API key securely from environment (fallback if not configured)
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        return {
-            "success": False,
-            "error": "Gemini API key is not configured. Please ensure GEMINI_API_KEY is set in your environment."
-        }
+        print("[SHAKTI AI ASSISTANT] GEMINI_API_KEY not configured. Providing predefined safety guidance.")
+        return get_safety_assistant_fallback(cleaned_text)
 
     api_key = api_key.strip().strip('"').strip("'")
 
@@ -1085,26 +1140,8 @@ Provide your structured JSON analysis now:"""
         print(tb_str)
         print("=" * 60 + "\n")
 
-        # Sanitize error output to prevent exposing technical details, URLs, or keys to user
-        error_lower = error_str.lower()
-        if any(kw in error_lower for kw in ["api_key", "unauthenticated", "permission", "403", "401"]):
-            user_error = "AI service authentication error. Please verify the Gemini API key configuration."
-        elif any(kw in error_lower for kw in ["quota", "rate limit", "429", "resource_exhausted"]):
-            user_error = "The AI safety service is temporarily experiencing high traffic. Please wait a moment and try again."
-        elif any(kw in error_lower for kw in ["not found", "404"]):
-            user_error = f"The requested Gemini model ({model_name}) is currently unavailable. Please check the model configuration."
-        elif any(kw in error_lower for kw in ["timeout", "deadline", "connection"]):
-            user_error = "Network timeout while contacting the AI safety service. Please check your internet connection and try again."
-        else:
-            user_error = (
-                "Unable to complete AI safety analysis at this moment. "
-                "If you are in immediate danger, please activate the SOS Emergency button or call emergency services (112) immediately."
-            )
-
-        return {
-            "success": False,
-            "error": user_error
-        }
+        print("[SHAKTI AI ASSISTANT] Gemini service unavailable. Serving structured safety fallback.")
+        return get_safety_assistant_fallback(cleaned_text)
 
     finally:
         # Ensure client is properly closed after use

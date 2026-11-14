@@ -104,3 +104,40 @@ class TestStartupAndRoutes(BaseTestCase):
         cp_res = self.client.get("/change_password")
         self.assertEqual(cp_res.status_code, 200)
         self.assertIn("Change Password", cp_res.get_data(as_text=True))
+
+    def test_database_indexes_created(self):
+        """Database initialization must create idx_contacts_user_id and idx_sos_history_user_id."""
+        conn = self.get_db()
+        indexes = [row["name"] for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'index'"
+        ).fetchall()]
+        conn.close()
+
+        self.assertIn("idx_contacts_user_id", indexes)
+        self.assertIn("idx_sos_history_user_id", indexes)
+
+    def test_emergency_helpline_links_rendered(self):
+        """Dashboard and SafeCircle pages must render official emergency helpline links (112, 1091, 181)."""
+        self.create_and_login_user(name="Helpline Tester", email="help_tester@example.com", password="Password123!")
+
+        # 1. Verify on Dashboard
+        dash_res = self.client.get("/dashboard")
+        self.assertEqual(dash_res.status_code, 200)
+        dash_html = dash_res.get_data(as_text=True)
+        self.assertIn('href="tel:112"', dash_html)
+        self.assertIn('href="tel:1091"', dash_html)
+        self.assertIn('href="tel:181"', dash_html)
+        self.assertIn("National Emergency", dash_html)
+        self.assertIn("Women Police Helpline", dash_html)
+        self.assertIn("Women Helpline", dash_html)
+
+        # 2. Verify on SafeCircle
+        sc_res = self.client.get("/safecircle")
+        self.assertEqual(sc_res.status_code, 200)
+        sc_html = sc_res.get_data(as_text=True)
+        self.assertIn('href="tel:112"', sc_html)
+        self.assertIn('href="tel:1091"', sc_html)
+        self.assertIn('href="tel:181"', sc_html)
+        self.assertIn("National Emergency", sc_html)
+        self.assertIn("Women Police Helpline", sc_html)
+        self.assertIn("Women Helpline", sc_html)

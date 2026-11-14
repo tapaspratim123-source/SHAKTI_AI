@@ -15,7 +15,7 @@
 
 <body class="auth-page">
 
-    <div class="auth-container">
+    <main class="auth-container">
 
         <h1>SHAKTI AI</h1>
 
@@ -24,28 +24,31 @@
         <form method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <label>Full Name</label>
+            <label for="name">Full Name</label>
 
             <input
                 type="text"
+                id="name"
                 name="name"
                 placeholder="Enter your full name"
                 required
             >
 
-            <label>Email Address</label>
+            <label for="email">Email Address</label>
 
             <input
                 type="email"
+                id="email"
                 name="email"
                 placeholder="Enter your email"
                 required
             >
 
-            <label>Password</label>
+            <label for="password">Password</label>
 
             <input
                 type="password"
+                id="password"
                 name="password"
                 placeholder="Create a password"
                 minlength="8"
@@ -60,7 +63,7 @@
 
             {% for message in messages %}
 
-                <p class="message">{{ message }}</p>
+                <p class="message" role="alert" aria-live="assertive">{{ message }}</p>
 
             {% endfor %}
 
@@ -75,7 +78,7 @@
             <a href="{{ url_for('home') }}">← Back to Home</a>
         </p>
 
-    </div>
+    </main>
 
 </body>
 

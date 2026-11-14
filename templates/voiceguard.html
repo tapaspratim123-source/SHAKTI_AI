@@ -274,7 +274,7 @@
 
 <body>
 
-    <div class="voice-container">
+    <main class="voice-container">
 
         <!-- EMERGENCY NUMBER 112 BANNER -->
         <div class="emergency-top-notice">
@@ -292,7 +292,7 @@
 
         <!-- VOICE STATUS -->
 
-        <div class="voice-status" id="voiceStatus">
+        <div class="voice-status" id="voiceStatus" role="status" aria-live="polite">
             VoiceGuard is currently inactive.
         </div>
 
@@ -323,7 +323,7 @@
 
             <h3>Recognised Speech</h3>
 
-            <p id="transcript">
+            <p id="transcript" aria-live="polite">
                 Your spoken words will appear here.
             </p>
 
@@ -332,7 +332,7 @@
 
         <!-- EMERGENCY WARNING -->
 
-        <div class="voice-warning" id="emergencyWarning">
+        <div class="voice-warning" id="emergencyWarning" role="alert" aria-live="assertive">
 
             <h3>⚠️ Emergency Keyword Detected!</h3>
 
@@ -355,7 +355,7 @@
 
 
         <!-- SOS RESULT CARD -->
-        <div class="sos-result-box" id="sosResultBox"></div>
+        <div class="sos-result-box" id="sosResultBox" role="alert" aria-live="assertive"></div>
 
 
         <!-- INFORMATION -->
@@ -383,7 +383,7 @@
             ← Back to Dashboard
         </a>
 
-    </div>
+    </main>
 
 
     <!-- VOICE RECOGNITION JAVASCRIPT -->
@@ -854,7 +854,7 @@
                     <strong>Detected Coordinates:</strong> ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)} (Accuracy: ~${Math.round(coords.accuracy)}m)
                 </p>
 
-                <a href="${escapeHTML(data.map_url)}" target="_blank" rel="noopener noreferrer" class="map-btn">
+                <a href="${escapeHTML(data.map_url)}" target="_blank" rel="noopener noreferrer" class="map-btn" aria-label="View detected emergency location on Google Maps">
                     🗺️ View Detected Location on Google Maps
                 </a>
             `;

@@ -216,3 +216,23 @@ import app
         proc = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn("CRITICAL SECURITY CONFIGURATION ERROR: The SECRET_KEY environment variable is not set", proc.stderr)
+
+    def test_http_security_headers_present(self):
+        """Responses must include X-Frame-Options, X-Content-Type-Options, and Referrer-Policy."""
+        # 1. Public GET endpoint
+        res_home = self.client.get("/")
+        self.assertEqual(res_home.headers.get("X-Frame-Options"), "SAMEORIGIN")
+        self.assertEqual(res_home.headers.get("X-Content-Type-Options"), "nosniff")
+        self.assertEqual(res_home.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin")
+
+        # 2. Auth GET endpoint
+        res_login = self.client.get("/login")
+        self.assertEqual(res_login.headers.get("X-Frame-Options"), "SAMEORIGIN")
+        self.assertEqual(res_login.headers.get("X-Content-Type-Options"), "nosniff")
+        self.assertEqual(res_login.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin")
+
+        # 3. 404 response
+        res_404 = self.client.get("/nonexistent-page-test")
+        self.assertEqual(res_404.headers.get("X-Frame-Options"), "SAMEORIGIN")
+        self.assertEqual(res_404.headers.get("X-Content-Type-Options"), "nosniff")
+        self.assertEqual(res_404.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin")
